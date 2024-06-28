@@ -52,7 +52,6 @@ class POIAgentService:
 	def __init__(self, poi_sql_db: POISQLDatabase):
 			self.poi_sql_db = poi_sql_db
 			self.model = ChatOpenAI(model="gpt-4o", temperature=0)
-			# self.tools = [StructuredTool.from_function(self.generate_sql_query, name="Run SQL Query", args_schema=POIInput)]
 			self.tools = [generate_sql_query]
 			self.tool_executor = ToolExecutor(self.tools)
 			self.functions = [convert_to_openai_function(t) for t in self.tools]

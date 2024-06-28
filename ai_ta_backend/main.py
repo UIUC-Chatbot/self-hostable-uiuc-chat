@@ -1,3 +1,4 @@
+import json
 import logging
 import os
 import time
@@ -43,6 +44,7 @@ from ai_ta_backend.extensions import db
 
 
 from langchain_core.messages import HumanMessage, SystemMessage
+from langchain.load import dumps
 
 app = Flask(__name__)
 CORS(app)
@@ -235,8 +237,12 @@ def query_sql_agent(service: POIAgentService):
     try:
         user_01 = HumanMessage(content=user_input)
         inputs = {"messages": [system_message,user_01]}
-        response = service.run_workflow(inputs)
-        return  str(response), 200
+        response = dumps(service.run_workflow(inputs))
+        final_response = json.loads(response)
+        # logging.info(f"response: {response}")
+        # Uncomment the next line to get only final AI response
+        # final_response = next((msg['kwargs'] for msg in reversed(final_response['messages']) if msg['kwargs']['type'] == 'ai'), None)
+        return jsonify({"response": final_response}), 200
     except Exception as e:
         return jsonify({"error": str(e)}), 500
 

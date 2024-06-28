@@ -37,14 +37,12 @@ services:
       - my-network
     healthcheck:
       test:
-        [
-          CMD,
-          curl,
-          -f,
-          -H,
-          { Authorization: Bearer qd-SbvSWrYpa473J33yPjdL },
-          http://localhost:6333/health,
-        ]
+        - CMD
+        - curl
+        - f
+        - "-H"
+        - "Authorization: Bearer qd-SbvSWrYpa473J33yPjdL"
+        - "http://localhost:6333/health"
       interval: 30s
       timeout: 10s
       retries: 3

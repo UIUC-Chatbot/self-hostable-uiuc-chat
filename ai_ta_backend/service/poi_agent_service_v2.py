@@ -42,7 +42,7 @@ def generate_sql_query(input:str) -> str:
 	user_question = input
 	llm = ChatOpenAI(model="gpt-4o", temperature=0)
 	### DATABASE
-	db = SQLDatabase.from_uri(f"sqlite:///{os.environ['POI_SQL_DB_NAME']}")
+	db = SQLDatabase.from_uri(os.environ['POI_SQL_DB_URI'])
 	sql_agent = initalize_sql_agent(llm, db)
 	response = generate_response_agent(sql_agent,user_question)
 	return response['output']
@@ -52,7 +52,6 @@ class POIAgentService:
 	def __init__(self, poi_sql_db: POISQLDatabase):
 			self.poi_sql_db = poi_sql_db
 			self.model = ChatOpenAI(model="gpt-4o", temperature=0)
-			# self.tools = [StructuredTool.from_function(self.generate_sql_query, name="Run SQL Query", args_schema=POIInput)]
 			self.tools = [generate_sql_query]
 			self.tool_executor = ToolExecutor(self.tools)
 			self.functions = [convert_to_openai_function(t) for t in self.tools]

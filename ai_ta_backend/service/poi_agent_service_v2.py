@@ -42,7 +42,7 @@ def generate_sql_query(input:str) -> str:
 	user_question = input
 	llm = ChatOpenAI(model="gpt-4o", temperature=0)
 	### DATABASE
-	db = SQLDatabase.from_uri(f"sqlite:///{os.environ['POI_SQL_DB_NAME']}")
+	db = SQLDatabase.from_uri(os.environ['POI_SQL_DB_URI'])
 	sql_agent = initalize_sql_agent(llm, db)
 	response = generate_response_agent(sql_agent,user_question)
 	return response['output']

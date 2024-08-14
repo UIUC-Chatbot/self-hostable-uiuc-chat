@@ -48,236 +48,726 @@ from langchain_openai import OpenAIEmbeddings
 def get_dynamic_prompt_template():
 		
 		examples = [
-		{
-				"input": "How many accepted names are only distributed in Karnataka?",
-				"query": 'SELECT COUNT(*) as unique_pairs_count FROM (SELECT DISTINCT "Family_Number", "Genus_Number", "Accepted_name_number" FROM plants WHERE "Record_Type_Code" = "DB" AND ("Additional_Details_2" LIKE "Karnataka%"));'
-		},
-		{
-				"input": "How many names were authored by Roxb?",
-				"query": 'SELECT COUNT(*) as unique_pairs_count FROM (SELECT DISTINCT "Family_Number", "Genus_Number", "Accepted_name_number" FROM plants WHERE "Author_Name" LIKE "%Roxb%" AND "Record_Type_Code" IN ("AN", "SN"));'
-		},
-		{
-				"input": "How many species have distributions in Myanmar, Meghalaya and Andhra Pradesh?",
-				"query": 'SELECT COUNT(*) FROM (SELECT DISTINCT "Family_Number", "Genus_Number", "Accepted_name_number" FROM plants WHERE "Record_Type_Code" = "DB" AND ("Additional_Details_2" LIKE "%Myanmar%" AND Additional_Details_2 LIKE "%Meghalaya%" AND "Additional_Details_2" LIKE "%Andhra Pradesh%"));'
-		},
-		{
-				"input": "List the accepted names common to Myanmar, Meghalaya, Odisha, Andhra Pradesh.",
-				"query": 'SELECT DISTINCT Scientific_Name FROM plants WHERE ("Family_Number", "Genus_Number", "Accepted_name_number") IN (SELECT DISTINCT "Family_Number", "Genus_Number", "Accepted_name_number" FROM plants WHERE "Record_Type_Code" = "DB" AND ("Additional_Details_2" LIKE "%Myanmar%" AND Additional_Details_2 LIKE "%Meghalaya%" AND "Additional_Details_2" LIKE "%Odisha%" AND "Additional_Details_2" LIKE "%Andhra Pradesh%"));'
-		},
-		{
-				"input": "List the accepted names that represent 'tree'.",
-				"query": 'SELECT DISTINCT "Scientific_Name" FROM plants WHERE ("Family_Number", "Genus_Number", "Accepted_name_number") IN (SELECT DISTINCT "Family_Number", "Genus_Number", "Accepted_name_number" FROM plants WHERE "Record_Type_Code" = "HB" AND "Additional_Details_2" LIKE "%tree%");'
-		},
-		{
-				"input": "List the accepted names linked with Endemic tag.",
-				"query": 'SELECT DISTINCT "Scientific_Name" FROM plants WHERE ("Family_Number", "Genus_Number", "Accepted_name_number") IN (SELECT DISTINCT "Family_Number", "Genus_Number", "Accepted_name_number" FROM plants WHERE "Record_Type_Code" = "DB" AND "Additional_Details_2" LIKE "%Endemic%");'
-		},
-		{
-				"input": "List the accepted names published in Fl. Brit. India [J. D. Hooker].",
-				"query": 'SELECT DISTINCT "Scientific_Name" FROM plants WHERE "Record_Type_Code" in ("AN", "SN") AND ("Publication" LIKE "%Fl. Brit. India [J. D. Hooker]%" OR "Publication" LIKE "%[J. D. Hooker]%" OR "Publication" LIKE "%Fl. Brit. India%");'
-		},
-		{
-				"input": "How many accepted names have ‘Silhet’/ ‘Sylhet’ in their Type?",
-				"query": 'SELECT DISTINCT "Scientific_Name" FROM plants WHERE ("Family_Number", "Genus_Number", "Accepted_name_number") IN (SELECT DISTINCT "Family_Number", "Genus_Number", "Accepted_name_number" FROM plants WHERE "Record_Type_Code" = "TY" AND ("Additional_Details_2" LIKE "%Silhet%" OR "Additional_Details_2" LIKE "%Sylhet%"));'
-		},
-		{
-				"input": "How many species were distributed in Sikkim and Meghalaya?",
-				"query": 'SELECT COUNT(*) AS unique_pairs FROM (SELECT DISTINCT "Family_Number", "Genus_Number", "Accepted_name_number" FROM plants WHERE "Record_Type_Code" = "DB" AND ("Additional_Details_2" LIKE "%Sikkim%" AND Additional_Details_2 LIKE "%Meghalaya%"));'
-		},
-		{
-				"input": "List the accepted names common to Kerala, Tamil Nadu, Andhra Pradesh, Karnataka, Maharashtra, Odisha, Meghalaya and Myanmar.",
-				"query": 'SELECT DISTINCT "Scientific_Name" FROM plants WHERE ("Family_Number", "Genus_Number", "Accepted_name_number") IN (SELECT DISTINCT "Family_Number", "Genus_Number", "Accepted_name_number" FROM plants WHERE "Record_Type_Code" = "DB" AND ("Additional_Details_2" LIKE "%Myanmar%" AND Additional_Details_2 LIKE "%Meghalaya%" AND "Additional_Details_2" LIKE "%Odisha%" AND "Additional_Details_2" LIKE "%Andhra Pradesh%" AND "Additional_Details_2" LIKE "%Kerala%" AND "Additional_Details_2" LIKE "%Tamil Nadu%" AND "Additional_Details_2" LIKE "%Karnataka%" AND "Additional_Details_2" LIKE "%Maharashtra%"));'
-		},
-		{
-				"input": "List the accepted names common to Europe, Afghanistan, Jammu & Kashmir, Himachal, Nepal, Sikkim, Bhutan, Arunachal Pradesh and China.",
-				"query": 'SELECT DISTINCT "Scientific_Name" FROM plants WHERE ("Family_Number", "Genus_Number", "Accepted_name_number") IN (SELECT DISTINCT "Family_Number", "Genus_Number", "Accepted_name_number" FROM plants WHERE "Record_Type_Code" = "DB" AND ("Additional_Details_2" LIKE "%Europe%" AND Additional_Details_2 LIKE "%Afghanistan%" AND "Additional_Details_2" LIKE "%Jammu & Kashmir%" AND "Additional_Details_2" LIKE "%Himachal%" AND "Additional_Details_2" LIKE "%Nepal%" AND "Additional_Details_2" LIKE "%Sikkim%" AND "Additional_Details_2" LIKE "%Bhutan%" AND "Additional_Details_2" LIKE "%Arunachal Pradesh%" AND "Additional_Details_2" LIKE "%China%"));'
-		},
-		{
-				"input": "List the accepted names common to Europe, Afghanistan, Austria, Belgium, Czechoslovakia, Denmark, France, Greece, Hungary, Italy, Moldava, Netherlands, Poland, Romania, Spain, Switzerland, Jammu & Kashmir, Himachal, Nepal, and China.",
-				"query": 'SELECT DISTINCT "Scientific_Name" FROM plants WHERE ("Family_Number", "Genus_Number", "Accepted_name_number") IN (SELECT DISTINCT "Family_Number", "Genus_Number", "Accepted_name_number" FROM plants WHERE "Record_Type_Code" = "DB" AND ("Additional_Details_2" LIKE "%Europe%" AND Additional_Details_2 LIKE "%Afghanistan%" AND "Additional_Details_2" LIKE "%Jammu & Kashmir%" AND "Additional_Details_2" LIKE "%Himachal%" AND "Additional_Details_2" LIKE "%Nepal%" AND "Additional_Details_2" LIKE "%Austria%" AND "Additional_Details_2" LIKE "%Belgium%" AND "Additional_Details_2" LIKE "%Czechoslovakia%" AND "Additional_Details_2" LIKE "%China%" AND "Additional_Details_2" LIKE "%Denmark%" AND "Additional_Details_2" LIKE "%Greece%" AND "Additional_Details_2" LIKE "%France%" AND "Additional_Details_2" LIKE "%Hungary%" AND "Additional_Details_2" LIKE "%Italy%" AND "Additional_Details_2" LIKE "%Moldava%" AND "Additional_Details_2" LIKE "%Netherlands%" AND "Additional_Details_2" LIKE "%Poland%" AND "Additional_Details_2" LIKE "%Poland%" AND "Additional_Details_2" LIKE "%Romania%" AND "Additional_Details_2" LIKE "%Spain%" AND "Additional_Details_2" LIKE "%Switzerland%"));'
-		},
-		{
-				"input": "List the species which are distributed in Sikkim and Meghalaya.",
-				"query": 'SELECT DISTINCT "Scientific_Name" FROM plants WHERE ("Family_Number", "Genus_Number", "Accepted_name_number") IN (SELECT DISTINCT "Family_Number", "Genus_Number", "Accepted_name_number" FROM plants WHERE "Record_Type_Code" = "DB" AND ("Additional_Details_2" LIKE "%Sikkim%" AND Additional_Details_2 LIKE "%Meghalaya%"));'
-		},
-		{
-				"input": "How many species are common to America, Europe, Africa, Asia, and Australia?",
-				"query": 'SELECT COUNT(*) AS unique_pairs IN (SELECT DISTINCT "Family_Number", "Genus_Number", "Accepted_name_number" FROM plants WHERE "Record_Type_Code" = "DB" AND ("Additional_Details_2" LIKE "%America%" AND Additional_Details_2 LIKE "%Europe%" AND "Additional_Details_2" LIKE "%Africa%" AND "Additional_Details_2" LIKE "%Asia%" AND "Additional_Details_2" LIKE "%Australia%"));'
-		},
-		{
-				"input": "List the species names common to India and Myanmar, Malaysia, Indonesia, and Australia.",
-				"query": 'SELECT DISTINCT "Scientific_Name" FROM plants WHERE ("Family_Number", "Genus_Number", "Accepted_name_number") IN (SELECT DISTINCT "Family_Number","Genus_Number", "Accepted_name_number" FROM plants WHERE "Record_Type_Code" = "DB" AND ("Additional_Details_2" LIKE "%India%" AND Additional_Details_2 LIKE "%Myanmar%" AND Additional_Details_2 LIKE "%Malaysia%" AND Additional_Details_2 LIKE "%Indonesia%" AND Additional_Details_2 LIKE "%Australia%"));'
-		},
-		{
-				"input": "List all plants which are tagged as urban.",
-				"query": 'SELECT DISTINCT "Scientific_Name" FROM plants WHERE "Record_Type_Code" IN ("AN", "SN") AND "Urban" = "YES";'
-		},
-		{
-				"input": "List all plants which are tagged as fruit.",
-				"query": 'SELECT DISTINCT "Scientific_Name" FROM plants WHERE "Record_Type_Code" IN ("AN", "SN") AND "Fruit" = "YES";'
-		},
-		{
-				"input": "List all plants which are tagged as medicinal.",
-				"query": 'SELECT DISTINCT "Scientific_Name" FROM plants WHERE "Record_Type_Code" IN ("AN", "SN") AND "Medicinal" = "YES";'
-		},
-		{
-				"input": "List all family names which are gymnosperms.",
-				"query": 'SELECT DISTINCT "Family_Name" FROM plants WHERE "Record_Type_Code" IN ("AN", "SN") AND "Groups" = "Gymnosperms";'
-		},
-		{
-				"input": "How many accepted names are tagged as angiosperms?",
-				"query": 'SELECT COUNT(DISTINCT "Scientific_Name") FROM plants WHERE "Record_Type_Code" IN ("AN", "SN") AND "Groups" = "Angiosperms";'
-		},
-		{
-				"input": "How many accepted names belong to the 'Saxifraga' genus?",
-				"query": 'SELECT COUNT(DISTINCT "Scientific_Name") FROM plants WHERE "Genus_Name" = "Saxifraga";'
-		},
-		{
-				"input": "List the accepted names tagged as 'perennial herb' or 'climber'.",
-				"query": 'SELECT DISTINCT "Scientific_Name" FROM plants WHERE ("Family_Number", "Genus_Number", "Accepted_name_number") IN (SELECT DISTINCT "Family_Number", "Genus_Number", "Accepted_name_number" FROM plants WHERE "Record_Type_Code" = "HB" AND ("Additional_Details_2" LIKE "%perennial herb%" OR "Additional_Details_2" LIKE "%climber%"));'
-		},
-		{
-				"input": "How many accepted names are native to South Africa?",
-				"query": 'SELECT COUNT(*) FROM plants WHERE ("Family_Number", "Genus_Number", "Accepted_name_number") IN (SELECT DISTINCT "Family_Number", "Genus_Number", "Accepted_name_number" FROM plants WHERE "Record_Type_Code" = "RE" AND "Additional_Details_2" LIKE "%native%" AND "Additional_Details_2" LIKE "%south%" AND "Additional_Details_2" LIKE "%africa%");'
+	{
+        "input": "How many names were authored by Roxb?",
+        "query": 'SELECT COUNT(*) as unique_pairs_count FROM (SELECT DISTINCT "familyNumber", "genusNumber", "acceptedNameNumber", "synonymNumber" FROM plants WHERE "authorName" LIKE "%Roxb%" AND "recordType" IN ("AN", "SN"));'
+    },
+    {
+        "input": "How many species have distributions in Myanmar, Meghalaya and Andhra Pradesh?",
+        "query": 'SELECT COUNT(*) FROM (SELECT DISTINCT "familyNumber", "genusNumber", "acceptedNameNumber", "synonymNumber" FROM plants WHERE "recordType" = "DB" AND ("additionalDetail2" LIKE "%Myanmar%" AND additionalDetail2 LIKE "%Meghalaya%" AND "additionalDetail2" LIKE "%Andhra Pradesh%"));'
+    },
+    {
+        "input": "List the accepted names common to Myanmar, Meghalaya, Odisha, Andhra Pradesh.",
+        "query": 'SELECT DISTINCT scientificName FROM plants WHERE "recordType" = "AN" AND ("familyNumber", "genusNumber", "acceptedNameNumber") IN (SELECT DISTINCT "familyNumber", "genusNumber", "acceptedNameNumber" FROM plants WHERE "recordType" = "DB" AND ("additionalDetail2" LIKE "%Myanmar%" AND additionalDetail2 LIKE "%Meghalaya%" AND "additionalDetail2" LIKE "%Odisha%" AND "additionalDetail2" LIKE "%Andhra Pradesh%"));'
+    },
+    {
+        "input": "List the accepted names that represent 'tree'.",
+        "query": 'SELECT DISTINCT "scientificName" FROM plants WHERE "recordType" = "AN" AND ("familyNumber", "genusNumber", "acceptedNameNumber") IN (SELECT DISTINCT "familyNumber", "genusNumber", "acceptedNameNumber" FROM plants WHERE "recordType" = "HB" AND "additionalDetail2" LIKE "%tree%");'
+    },
+    {
+        "input": "List the accepted names linked with Endemic tag.",
+        "query": 'SELECT DISTINCT "scientificName" FROM plants WHERE "recordType" = "AN" AND ("familyNumber", "genusNumber", "acceptedNameNumber") IN (SELECT DISTINCT "familyNumber", "genusNumber", "acceptedNameNumber" FROM plants WHERE "recordType" = "DB" AND "additionalDetail2" LIKE "%Endemic%");'
+    },
+    {
+        "input": "Name some plants which are tagged as endemic.",
+        "query": 'SELECT DISTINCT "scientificName" FROM plants WHERE "recordType" IN ("AN", "SN") AND ("familyNumber", "genusNumber", "acceptedNameNumber", "synonymNumber") IN (SELECT DISTINCT "familyNumber", "genusNumber", "acceptedNameNumber", "synonymNumber" FROM plants WHERE "recordType" = "DB" AND "additionalDetail2" LIKE "%Endemic%");'
 
-		},
-		{
-				"input": "List the accepted names which were introduced and naturalized.",
-				"query": 'SELECT DISTINCT "Scientific_Name FROM plants WHERE ("Family_Number", "Genus_Number", "Accepted_name_number") IN (SELECT DISTINCT "Family_Number", "Genus_Number", "Accepted_name_number" FROM plants WHERE "Record_Type_Code" = "RE" AND "Additional_Details_2" LIKE "%introduced%" AND "Additional_Details_2" LIKE "%naturalized%");'
-		},
-		{
-				"input": "List all ornamental plants.",
-				"query": 'SELECT DISTINCT "Scientific_Name FROM plants WHERE ("Family_Number", "Genus_Number", "Accepted_name_number") IN (SELECT DISTINCT "Family_Number", "Genus_Number", "Accepted_name_number" FROM plants WHERE "Record_Type_Code" = "RE" AND "Additional_Details_2" LIKE "%ornamental%");'
-		},
-		{
-				"input": "How many plants from the 'Leguminosae' family have a altitudinal range up to 1000 m?",
-				"query": 'SELECT COUNT(*) FROM plants WHERE "Record_Type_Code" = "AL" AND "Family_Name" = "Leguminosae" AND "Additional_Details_2" LIKE "%1000%";'
-		},
-		{
-				"input": "List the accepted names linked with the 'endemic' tag for Karnataka.",
-				"query": 'SELECT DISTINCT "Scientific_Name" FROM plants WHERE ("Family_Number", "Genus_Number", "Accepted_name_number") IN (SELECT DISTINCT "Family_Number", "Genus_Number", "Accepted_name_number" FROM plants WHERE "Record_Type_Code" = "DB" AND "Additional_Details_2" LIKE "%Endemic%" AND "Additional_Details_2" LIKE "%Karnataka%");'
-		},
-		{"input": "List all the accepted names under the family 'Gnetaceae'.",
-		 "query": """
-SELECT DISTINCT "Scientific_Name" FROM plants
+    },
+    {
+        "input": "List the accepted names published in Fl. Brit. India [J. D. Hooker].",
+        "query": 'SELECT DISTINCT "scientificName" FROM plants WHERE "recordType" = "AN" AND ("publication" LIKE "%Fl. Brit. India [J. D. Hooker]%" OR "Publication" LIKE "%[J. D. Hooker]%" OR "Publication" LIKE "%Fl. Brit. India%");'
+    },
+    {
+        "input": "Name some plants published in Bot. Zeitung.",
+        "query": 'SELECT DISTINCT "scientificName" FROM plants WHERE "recordType" IN ("AN", "SN") AND "publication" LIKE "%Bot. Zeitung%";'
+    },
+    {
+        "input": "List some species published in Acta Horti Gothub. after 1930.",
+        "query": 'SELECT DISTINCT "scientificName" FROM plants WHERE "recordType" IN ("AN", "SN") AND "publication" LIKE "%Acta Horti Gothub%" AND "yearOfpublication" > 1930;'
+    },
+    {
+        "input": "How many plants do not have a designated type?",
+        "query": 'SELECT COUNT(DISTINCT "scientificName") FROM plants WHERE "recordType" IN ("AN", "SN") AND ("familyNumber", "genusNumber", "acceptedNameNumber", "synonymNumber") IN (SELECT DISTINCT "familyNumber", "genusNumber", "acceptedNameNumber", "synonymNumber" FROM plants WHERE "recordType" = "TY" AND "additionalDetail2" LIKE "%not designated%");'
+    },
+    {
+        "input": "How many accepted names have ‘Silhet’/ ‘Sylhet’ in their Type?",
+        "query": 'SELECT DISTINCT "scientificName" FROM plants WHERE "recordType" = "AN" AND ("familyNumber", "genusNumber", "acceptedNameNumber") IN (SELECT DISTINCT "familyNumber", "genusNumber", "acceptedNameNumber" FROM plants WHERE "recordType" = "TY" AND ("additionalDetail2" LIKE "%Silhet%" OR "additionalDetail2" LIKE "%Sylhet%"));'
+    },
+    {
+        "input": "How many plants or species have ‘Silhet’/ ‘Sylhet’ in their Type?",
+        "query": 'SELECT DISTINCT "scientificName" FROM plants WHERE "recordType" IN ("AN", "SN") AND ("familyNumber", "genusNumber", "acceptedNameNumber", "synonymNumber") IN (SELECT DISTINCT "familyNumber", "genusNumber", "acceptedNameNumber", "synonymNumber" FROM plants WHERE "recordType" = "TY" AND ("additionalDetail2" LIKE "%Silhet%" OR "additionalDetail2" LIKE "%Sylhet%"));'
+    },
+    {
+        "input": "How many species were distributed in Sikkim and Meghalaya?",
+        "query": 'SELECT COUNT(*) AS unique_pairs FROM (SELECT DISTINCT "familyNumber", "genusNumber", "acceptedNameNumber", "synonymNumber" FROM plants WHERE "recordType" = "DB" AND ("additionalDetail2" LIKE "%Sikkim%" AND additionalDetail2 LIKE "%Meghalaya%"));'
+    },
+    {
+        "input": "List the accepted names common to Kerala, Tamil Nadu, Andhra Pradesh, Karnataka, Maharashtra, Odisha, Meghalaya and Myanmar.",
+        "query": 'SELECT DISTINCT "scientificName" FROM plants WHERE "recordType" = "AN" AND ("familyNumber", "genusNumber", "acceptedNameNumber") IN (SELECT DISTINCT "familyNumber", "genusNumber", "acceptedNameNumber" FROM plants WHERE "recordType" = "DB" AND ("additionalDetail2" LIKE "%Myanmar%" AND additionalDetail2 LIKE "%Meghalaya%" AND "additionalDetail2" LIKE "%Odisha%" AND "additionalDetail2" LIKE "%Andhra Pradesh%" AND "additionalDetail2" LIKE "%Kerala%" AND "additionalDetail2" LIKE "%Tamil Nadu%" AND "additionalDetail2" LIKE "%Karnataka%" AND "additionalDetail2" LIKE "%Maharashtra%"));'
+    },
+    {
+        "input": "List the accepted names common to Europe, Afghanistan, Jammu & Kashmir, Himachal, Nepal, Sikkim, Bhutan, Arunachal Pradesh and China.",
+        "query": 'SELECT DISTINCT "scientificName" FROM plants WHERE "recordType" = "AN" AND ("familyNumber", "genusNumber", "acceptedNameNumber") IN (SELECT DISTINCT "familyNumber", "genusNumber", "acceptedNameNumber" FROM plants WHERE "recordType" = "DB" AND ("additionalDetail2" LIKE "%Europe%" AND additionalDetail2 LIKE "%Afghanistan%" AND "additionalDetail2" LIKE "%Jammu & Kashmir%" AND "additionalDetail2" LIKE "%Himachal%" AND "additionalDetail2" LIKE "%Nepal%" AND "additionalDetail2" LIKE "%Sikkim%" AND "additionalDetail2" LIKE "%Bhutan%" AND "additionalDetail2" LIKE "%Arunachal Pradesh%" AND "additionalDetail2" LIKE "%China%"));'
+    },
+    {
+        "input": "List the accepted names common to Europe, Afghanistan, Austria, Belgium, Czechoslovakia, Denmark, France, Greece, Hungary, Italy, Moldava, Netherlands, Poland, Romania, Spain, Switzerland, Jammu & Kashmir, Himachal, Nepal, and China.",
+        "query": 'SELECT DISTINCT "scientificName" FROM plants WHERE "recordType" = "AN" AND ("familyNumber", "genusNumber", "acceptedNameNumber") IN (SELECT DISTINCT "familyNumber", "genusNumber", "acceptedNameNumber" FROM plants WHERE "recordType" = "DB" AND ("additionalDetail2" LIKE "%Europe%" AND additionalDetail2 LIKE "%Afghanistan%" AND "additionalDetail2" LIKE "%Jammu & Kashmir%" AND "additionalDetail2" LIKE "%Himachal%" AND "additionalDetail2" LIKE "%Nepal%" AND "additionalDetail2" LIKE "%Austria%" AND "additionalDetail2" LIKE "%Belgium%" AND "additionalDetail2" LIKE "%Czechoslovakia%" AND "additionalDetail2" LIKE "%China%" AND "additionalDetail2" LIKE "%Denmark%" AND "additionalDetail2" LIKE "%Greece%" AND "additionalDetail2" LIKE "%France%" AND "additionalDetail2" LIKE "%Hungary%" AND "additionalDetail2" LIKE "%Italy%" AND "additionalDetail2" LIKE "%Moldava%" AND "additionalDetail2" LIKE "%Netherlands%" AND "additionalDetail2" LIKE "%Poland%" AND "additionalDetail2" LIKE "%Poland%" AND "additionalDetail2" LIKE "%Romania%" AND "additionalDetail2" LIKE "%Spain%" AND "additionalDetail2" LIKE "%Switzerland%"));'
+    },
+    {
+        "input": "List the species which are distributed in Sikkim and Meghalaya.",
+        "query": 'SELECT DISTINCT "scientificName" FROM plants WHERE "recordType" IN ("AN", "SN") AND ("familyNumber", "genusNumber", "acceptedNameNumber", "synonymNumber") IN (SELECT DISTINCT "familyNumber", "genusNumber", "acceptedNameNumber", "synonymNumber" FROM plants WHERE "recordType" = "DB" AND ("additionalDetail2" LIKE "%Sikkim%" AND additionalDetail2 LIKE "%Meghalaya%"));'
+    },
+    {
+        "input": "How many species are common to America, Europe, Africa, Asia, and Australia?",
+        "query": 'SELECT COUNT(*) AS unique_pairs IN (SELECT DISTINCT "familyNumber", "genusNumber", "acceptedNameNumber", "synonymNumber" FROM plants WHERE "recordType" = "DB" AND ("additionalDetail2" LIKE "%America%" AND additionalDetail2 LIKE "%Europe%" AND "additionalDetail2" LIKE "%Africa%" AND "additionalDetail2" LIKE "%Asia%" AND "additionalDetail2" LIKE "%Australia%"));'
+    },
+    {
+        "input": "List the species names common to India and Myanmar, Malaysia, Indonesia, and Australia.",
+        "query": 'SELECT DISTINCT "Scientific_Name" FROM plants WHERE "recordType" IN ("AN", "SN") AND ("familyNumber", "genusNumber", "acceptedNameNumber", "synonymNumber") IN (SELECT DISTINCT "familyNumber", "genusNumber", "acceptedNameNumber", "synonymNumber" FROM plants WHERE "recordType" = "DB" AND ("additionalDetail2" LIKE "%India%" AND additionalDetail2 LIKE "%Myanmar%" AND additionalDetail2 LIKE "%Malaysia%" AND additionalDetail2 LIKE "%Indonesia%" AND additionalDetail2 LIKE "%Australia%"));'
+    },
+    {
+        "input": "List all plants which are tagged as urban.",
+        "query": 'SELECT DISTINCT "scientificName" FROM plants WHERE "recordType" IN ("AN", "SN") AND "urban" = "YES";'
+    },
+    {
+        "input": "List all plants which are tagged as fruit.",
+        "query": 'SELECT DISTINCT "scientificName" FROM plants WHERE "recordType" IN ("AN", "SN") AND "fruit" = "YES";'
+    },
+    {
+        "input": "List all plants which are tagged as medicinal.",
+        "query": 'SELECT DISTINCT "scientificName" FROM plants WHERE "recordType" IN ("AN", "SN") AND "medicinal" = "YES";'
+    },
+    {
+        "input": "List all family names which are gymnosperms.",
+        "query": 'SELECT DISTINCT "familyName" FROM plants WHERE "recordType" IN ("AN", "SN") AND "group" = "Gymnosperms";'
+    },
+    {
+        "input": "How many accepted names are tagged as angiosperms?",
+        "query": 'SELECT COUNT(DISTINCT "scientificName") FROM plants WHERE "recordType" = "AN" AND "group" = "Angiosperms";'
+    },
+    {
+        "input": "How many accepted names belong to the 'Saxifraga' genus?",
+        "query": 'SELECT COUNT(DISTINCT "scientificName") FROM plants WHERE "genusName" = "Saxifraga" AND "recordType" = "AN";'
+    },
+    {
+        "input": "List the accepted names tagged as 'perennial herb' or 'climber'.",
+        "query": 'SELECT DISTINCT "scientificName" FROM plants WHERE "recordType" = "AN" AND ("familyNumber", "genusNumber", "acceptedNameNumber") IN (SELECT DISTINCT "familyNumber", "genusNumber", "acceptedNameNumber" FROM plants WHERE "recordType" = "HB" AND (("additionalDetail2" LIKE "%perennial%" AND "additionalDetail2" LIKE "%herb%") OR "additionalDetail2" LIKE "%climber%")));'
+    },
+    {
+        "input": "List the species that represent aquatic herb.",
+        "query": 'SELECT DISTINCT "scientificName" FROM plants WHERE "recordType" IN ("AN", "SN") AND ("familyNumber", "genusNumber", "acceptedNameNumber", "synonymNumber") IN (SELECT DISTINCT "familyNumber", "genusNumber", "acceptedNameNumber", "synonymNumber" FROM plants WHERE "recordType" = "HB" AND (("additionalDetail2" LIKE "%aquatic%" AND "additionalDetail2" LIKE "%herb%") OR "additionalDetail2" LIKE "%climber%")));'
+    },
+    {
+        "input": "How many plants are represented as a succulent chamerophyte?",
+        "query": 'SELECT COUNT(DISTINCT "scientificName") FROM plants WHERE "recordType" IN ("AN", "SN") AND ("familyNumber", "genusNumber", "acceptedNameNumber", "synonymNumber") IN (SELECT DISTINCT "familyNumber", "genusNumber", "acceptedNameNumber", "synonymNumber" FROM plants WHERE "recordType" = "HB" AND "additionalDetail2" LIKE "%succulent%" AND "additionalDetail2" LIKE "%chamerophyte%");'
+
+    },
+    {
+        "input": "How many accepted names are native to South Africa?",
+        "query": 'SELECT COUNT(DISTINCT scientificName) FROM plants WHERE "recordType" = "AN" AND ("familyNumber", "genusNumber", "acceptedNameNumber") IN (SELECT DISTINCT "familyNumber", "genusNumber", "acceptedNameNumber" FROM plants WHERE "recordType" = "RE" AND "additionalDetail2" LIKE "%native%" AND "additionalDetail2" LIKE "%south%" AND "additionalDetail2" LIKE "%africa%");'
+
+    },
+    {
+        "input": "How many accepted names are native to China?",
+        "query": 'SELECT COUNT(DISTINCT scientificName) FROM plants WHERE "recordType" = "AN" AND ("familyNumber", "genusNumber", "acceptedNameNumber") IN (SELECT DISTINCT "familyNumber", "genusNumber", "acceptedNameNumber" FROM plants WHERE "recordType" = "RE" AND "additionalDetail2" LIKE "%native%" AND "additionalDetail2" LIKE "%china%");'
+
+    },
+    {
+        "input": "List the accepted names which were introduced and naturalized.",
+        "query": 'SELECT DISTINCT "scientificName FROM plants WHERE "recordType" = "AN" AND ("familyNumber", "genusNumber", "acceptedNameNumber") IN (SELECT DISTINCT "familyNumber", "genusNumber", "acceptedNameNumber" FROM plants WHERE "recordType" = "RE" AND "additionalDetail2" LIKE "%introduced%" AND "additionalDetail2" LIKE "%naturalized%");'
+    },
+    {
+        "input": "How many accepted names are cultivated?",
+        "query": 'SELECT COUNT(DISTINCT "scientificName) FROM plants WHERE "recordType" = "AN" AND ("familyNumber", "genusNumber", "acceptedNameNumber") IN (SELECT DISTINCT "familyNumber", "genusNumber", "acceptedNameNumber" FROM plants WHERE "recordType" = "RE" AND "additionalDetail2" LIKE "%cultivated%");'
+
+    },
+    {
+        "input": "List all ornamental plants.",
+        "query": 'SELECT DISTINCT "scientificName FROM plants WHERE "recordType" IN ("AN", "SN") AND ("familyNumber", "genusNumber", "acceptedNameNumber", "synonymNumber") IN (SELECT DISTINCT "familyNumber", "genusNumber", "acceptedNameNumber", "synonymNumber" FROM plants WHERE "recordType" = "RE" AND "additionalDetail2" LIKE "%ornamental%");'
+    },
+    {
+        "input": "How many plants from the 'Leguminosae' family have a altitudinal range up to 1000 m?",
+        "query": 'SELECT COUNT(*) FROM plants WHERE "recordType" = "AL" AND "familyName" = "Leguminosae" AND "additionalDetail2" LIKE "%1000%";'
+    },
+    {
+        "input": "List the accepted names linked with the 'endemic' tag for Karnataka.",
+        "query": 'SELECT DISTINCT "scientificName" FROM plants WHERE "recordType" = "AN" AND ("familyNumber", "genusNumber", "acceptedNameNumber") IN (SELECT DISTINCT "familyNumber", "genusNumber", "acceptedNameNumber" FROM plants WHERE "recordType" = "DB" AND "additionalDetail2" LIKE "%Endemic%" AND "additionalDetail2" LIKE "%Karnataka%");'
+    },
+    {
+        "input": "How many species did Vahl discover?",
+        "query": 'SELECT COUNT(DISTINCT "scientificName") FROM plants WHERE "recordType" IN ("AN", "SN") AND "authorName" LIKE "%Vahl%";'
+    },
+    {
+        "input": "How many names are rooted with basionym?",
+        "query": 'SELECT COUNT(DISTINCT "scientificName") FROM plants WHERE "recordType" IN ("AN", "SN") AND "authorName" LIKE "%(%;',
+    },
+    {
+      "input": "How many plants are introduced and naturalized?",
+      "query": 'SELECT COUNT(DISTINCT "scientificName") FROM plants WHERE "recordType" IN ("AN", "SN") AND ("familyNumber", "genusNumber", "acceptedNameNumber", "synonymNumber") IN (SELECT DISTINCT "familyNumber", "genusNumber", "acceptedNameNumber", "synonymNumber") FROM plants WHERE "recordType" = "RE" AND "additionalDetail2" LIKE "%introduced%" AND ("additionalDetail2" LIKE "%naturalized%" OR "additionalDetail2" LIKE "%naturalised%"));',
+    },
+    {
+        "input": "List some endangered plant species.",
+        "query": 'SELECT DISTINCT "scientificName" FROM plants WHERE "recordType" IN ("AN", "SN") AND ("familyNumber", "genusNumber", "acceptedNameNumber", "synonymNumber") IN (SELECT DISTINCT "familyNumber", "genusNumber", "acceptedNameNumber", "synonymNumber" FROM plants WHERE "recordType" = "RE" AND "additionalDetail2" LIKE "%endangered%");',
+    },
+    {
+        "input": "Which plants are represented as biennial and perennial herb?",
+        "query": 'SELECT DISTINCT "scientificName" FROM plants WHERE "recordType" IN ("AN", "SN") AND ("familyNumber", "genusNumber", "acceptedNameNumber", "synonymNumber") IN (SELECT DISTINCT "familyNumber", "genusNumber", "acceptedNameNumber", "synonymNumber" FROM plants WHERE "recordType" = "HB" AND "additionalDetail2" LIKE "%herb%" AND ("additionalDetail2" LIKE "%biennial%" OR "additionalDetail2" LIKE "%perennial%"));',
+    },
+    {
+        "input": "Which genera have basionyms?",
+        "query": 'SELECT DISTINCT genusName FROM plants WHERE "recordType" IN ("AN", "SN") AND "authorName" LIKE "%(%;',
+    },
+    {
+        "input": "List some basionyms found by Aiton.",
+        "query": 'SELECT DISTINCT "scientificName" FROM plants WHERE "recordType" IN ("AN", "SN") AND "authorName" LIKE "%Aiton%" AND "authorName" LIKE "%(%");',
+    },
+    {
+        "input": "List the plant species belonging to the genus 'Mangifera' found in the state of Maharashtra.",
+        "query": 'SELECT DISTINCT "scientificName" FROM plants WHERE "recordType" IN ("AN", "SN") AND "genusName" LIKE "%Mangifera%" AND ("familyNumber", "genusNumber", "acceptedNameNumber", "synonymNumber") IN (SELECT DISTINCT "familyNumber", "genusNumber", "acceptedNameNumber", "synonymNumber" FROM plants WHERE "recordType" = "DB" AND "additionalDetail2" LIKE "%Maharashtra%");',
+    },
+    {
+        "input": "Find all plant species in the family 'Rosaceae' found in the United States.",
+        "query": 'SELECT DISTINCT "scientificName" FROM plants WHERE "recordType" IN ("AN", "SN") AND "familyName" LIKE "%Rosaceae%" AND ("familyNumber", "genusNumber", "acceptedNameNumber", "synonymNumber") IN (SELECT DISTINCT "familyNumber", "genusNumber", "acceptedNameNumber", "synonymNumber" FROM plants WHERE "recordType" = "DB" AND "additionalDetail2" LIKE "%United States%");',
+    },
+    {
+        "input": "Find the species of the genus 'Pinus' located in Europe.",
+        "query": 'SELECT DISTINCT "scientificName" FROM plants WHERE "recordType" IN ("AN", "SN") AND "genusName" LIKE "%Pinus%" AND ("familyNumber", "genusNumber", "acceptedNameNumber", "synonymNumber") IN (SELECT DISTINCT "familyNumber", "genusNumber", "acceptedNameNumber", "synonymNumber" FROM plants WHERE "recordType" = "DB" AND "additionalDetail2" LIKE "%Europe%");',
+    },
+    {
+        "input": "List the plants from the 'Myrtaceae' family that are found in South America.",
+        "query": 'SELECT DISTINCT "scientificName" FROM plants WHERE "recordType" IN ("AN", "SN") AND "familyName" LIKE "%Myrtaceae%" AND ("familyNumber", "genusNumber", "acceptedNameNumber", "synonymNumber") IN (SELECT DISTINCT "familyNumber", "genusNumber", "acceptedNameNumber", "synonymNumber" FROM plants WHERE "recordType" = "DB" AND "additionalDetail2" LIKE "%South America%");',
+    },
+    {
+        "input": "Find all plant species in the family 'Rubiaceae' found in Africa.",
+        "query": 'SELECT DISTINCT "scientificName" FROM plants WHERE "recordType" IN ("AN", "SN") AND "familyName" LIKE "%Rubiaceae%" AND ("familyNumber", "genusNumber", "acceptedNameNumber", "synonymNumber") IN (SELECT DISTINCT "familyNumber", "genusNumber", "acceptedNameNumber", "synonymNumber" FROM plants WHERE "recordType" = "DB" AND "additionalDetail2" LIKE "%Africa%");',
+    },
+    {
+        "input": "List the species of the genus 'Lavandula' in the family 'Lamiaceae' that are native to the Mediterranean region.",
+        "query": 'SELECT DISTINCT "scientificName" FROM plants WHERE "recordType" IN ("AN", "SN") AND "familyName" LIKE "%Lamiaceae%" AND "genusName" LIKE "%Lavandula%" AND ("familyNumber", "genusNumber", "acceptedNameNumber", "synonymNumber") IN (SELECT DISTINCT "familyNumber", "genusNumber", "acceptedNameNumber", "synonymNumber" FROM plants WHERE "recordType" = "RE" AND "additionalDetail2" LIKE "%native%" AND "additionalDetail2" LIKE "%Mediterranean%");',
+    },
+    {
+        "input": "Find the genera of plants in the 'Asteraceae' family that are found in both China and Japan.",
+        "query": 'SELECT DISTINCT "genusName" FROM plants WHERE "recordType" = "GE" AND "familyName" LIKE "%Asteraceae%" AND ("familyNumber", "genusNumber") IN (SELECT "familyNumber", "genusNumber" FROM plants WHERE "recordType" = "DB" AND "additionalDetail2" LIKE "%China%" AND "additionalDetail2" LIKE "%Japan%");'
+    },
+    {
+        "input": "List the species of the genus 'Acer' found in Canada.",
+        "query": 'SELECT DISTINCT "scientificName" FROM plants WHERE "recordType" IN ("AN", "SN") AND "genusName" LIKE "%Acer%" AND ("familyNumber", "genusNumber") IN (SELECT "familyNumber", "genusNumber" FROM plants WHERE "recordType" = "DB" AND "additionalDetail2" LIKE "%Canada%");'
+    },
+    {
+        "input": "List the basionyms authored by L.",
+        "query": 'SELECT DISTINCT "scientificName" FROM plants WHERE "recordType" IN ("AN", "SN") AND "authorName" LIKE "%L.%" AND "authorName" LIKE "%(%";',
+    },
+    {
+        "input": "List the genera of plants in the family 'Fabaceae' found in both India and Australia.",
+        "query": """SELECT DISTINCT "genusName" FROM plants WHERE "recordType" = "GE" AND "familyName" LIKE "%Fabaceae%" AND
+        ("familyNumber", "genusNumber", "acceptedNameNumber", "synonymNumber") IN (SELECT DISTINCT "familyNumber", "genusNumber", "acceptedNameNumber", "synonymNumber" FROM plants WHERE "recordType" = "DB" AND
+        "additionalDetail2" LIKE "%Australia%" AND
+        ("additionalDetail2" LIKE "%India%"
+        OR ("additionalDetail2" LIKE "%Andhra Pradesh%")
+   OR ("additionalDetail2" LIKE "%Arunachal Pradesh%")
+   OR ("additionalDetail2" LIKE "%Assam%")
+   OR ("additionalDetail2" LIKE "%Bihar%")
+   OR ("additionalDetail2" LIKE "%Chhattisgarh%")
+   OR ("additionalDetail2" LIKE "%Goa%")
+   OR ("additionalDetail2" LIKE "%Gujarat%")
+   OR ("additionalDetail2" LIKE "%Haryana%")
+   OR ("additionalDetail2" LIKE "%Himachal Pradesh%")
+   OR ("additionalDetail2" LIKE "%Jharkhand%")
+   OR ("additionalDetail2" LIKE "%Karnataka%")
+   OR ("additionalDetail2" LIKE "%Kerala%")
+   OR ("additionalDetail2" LIKE "%Madhya Pradesh%")
+   OR ("additionalDetail2" LIKE "%Maharashtra%")
+   OR ("additionalDetail2" LIKE "%Manipur%")
+   OR ("additionalDetail2" LIKE "%Meghalaya%")
+   OR ("additionalDetail2" LIKE "%Mizoram%")
+   OR ("additionalDetail2" LIKE "%Nagaland%")
+   OR ("additionalDetail2" LIKE "%Odisha%")
+   OR ("additionalDetail2" LIKE "%Punjab%")
+   OR ("additionalDetail2" LIKE "%Rajasthan%")
+   OR ("additionalDetail2" LIKE "%Sikkim%")
+   OR ("additionalDetail2" LIKE "%Tamil Nadu%")
+   OR ("additionalDetail2" LIKE "%Telangana%")
+   OR ("additionalDetail2" LIKE "%Tripura%")
+   OR ("additionalDetail2" LIKE "%Uttar Pradesh%")
+   OR ("additionalDetail2" LIKE "%Uttarakhand%")
+   OR ("additionalDetail2" LIKE "%West Bengal%")
+   OR ("additionalDetail2" LIKE "%Delhi%")
+   OR ("additionalDetail2" LIKE "%Jammu and Kashmir%")
+   OR ("additionalDetail2" LIKE "%Ladakh%")));""",
+    },
+    {
+        "input": "How many scientific names are common to Japan and India?",
+        "query": """
+        SELECT COUNT(DISTINCT "scientificName")
+FROM plants
+WHERE "recordType" IN ("AN", "SN") AND ("familyNumber", "genusNumber", "acceptedNameNumber", "synonymNumber") IN
+ (SELECT DISTINCT "familyNumber", "genusNumber", "acceptedNameNumber", "synonymNumber" FROM plants WHERE "recordType" = "DB" AND "additionalDetail2" LIKE "%Japan%" AND
+ (("additionalDetail2" LIKE "%India%")
+   OR ("additionalDetail2" LIKE "%Andhra Pradesh%")
+   OR ("additionalDetail2" LIKE "%Arunachal Pradesh%")
+   OR ("additionalDetail2" LIKE "%Assam%")
+   OR ("additionalDetail2" LIKE "%Bihar%")
+   OR ("additionalDetail2" LIKE "%Chhattisgarh%")
+   OR ("additionalDetail2" LIKE "%Goa%")
+   OR ("additionalDetail2" LIKE "%Gujarat%")
+   OR ("additionalDetail2" LIKE "%Haryana%")
+   OR ("additionalDetail2" LIKE "%Himachal Pradesh%")
+   OR ("additionalDetail2" LIKE "%Jharkhand%")
+   OR ("additionalDetail2" LIKE "%Karnataka%")
+   OR ("additionalDetail2" LIKE "%Kerala%")
+   OR ("additionalDetail2" LIKE "%Madhya Pradesh%")
+   OR ("additionalDetail2" LIKE "%Maharashtra%")
+   OR ("additionalDetail2" LIKE "%Manipur%")
+   OR ("additionalDetail2" LIKE "%Meghalaya%")
+   OR ("additionalDetail2" LIKE "%Mizoram%")
+   OR ("additionalDetail2" LIKE "%Nagaland%")
+   OR ("additionalDetail2" LIKE "%Odisha%")
+   OR ("additionalDetail2" LIKE "%Punjab%")
+   OR ("additionalDetail2" LIKE "%Rajasthan%")
+   OR ("additionalDetail2" LIKE "%Sikkim%")
+   OR ("additionalDetail2" LIKE "%Tamil Nadu%")
+   OR ("additionalDetail2" LIKE "%Telangana%")
+   OR ("additionalDetail2" LIKE "%Tripura%")
+   OR ("additionalDetail2" LIKE "%Uttar Pradesh%")
+   OR ("additionalDetail2" LIKE "%Uttarakhand%")
+   OR ("additionalDetail2" LIKE "%West Bengal%")
+   OR ("additionalDetail2" LIKE "%Delhi%")
+   OR ("additionalDetail2" LIKE "%Jammu and Kashmir%")
+   OR ("additionalDetail2" LIKE "%Ladakh%")));
+        """
+    },
+    {
+        "input": "How many accepted names are common to Australia and India?",
+        "query": """
+        SELECT COUNT(DISTINCT "scientificName")
+FROM plants
+WHERE "recordType" = "AN" AND ("familyNumber", "genusNumber", "acceptedNameNumber") IN
+ (SELECT DISTINCT "familyNumber", "genusNumber", "acceptedNameNumber" FROM plants WHERE "recordType" = "DB" AND "additionalDetail2" LIKE "%Australia%" AND
+ (("additionalDetail2" LIKE "%India%")
+   OR ("additionalDetail2" LIKE "%Andhra Pradesh%")
+   OR ("additionalDetail2" LIKE "%Arunachal Pradesh%")
+   OR ("additionalDetail2" LIKE "%Assam%")
+   OR ("additionalDetail2" LIKE "%Bihar%")
+   OR ("additionalDetail2" LIKE "%Chhattisgarh%")
+   OR ("additionalDetail2" LIKE "%Goa%")
+   OR ("additionalDetail2" LIKE "%Gujarat%")
+   OR ("additionalDetail2" LIKE "%Haryana%")
+   OR ("additionalDetail2" LIKE "%Himachal Pradesh%")
+   OR ("additionalDetail2" LIKE "%Jharkhand%")
+   OR ("additionalDetail2" LIKE "%Karnataka%")
+   OR ("additionalDetail2" LIKE "%Kerala%")
+   OR ("additionalDetail2" LIKE "%Madhya Pradesh%")
+   OR ("additionalDetail2" LIKE "%Maharashtra%")
+   OR ("additionalDetail2" LIKE "%Manipur%")
+   OR ("additionalDetail2" LIKE "%Meghalaya%")
+   OR ("additionalDetail2" LIKE "%Mizoram%")
+   OR ("additionalDetail2" LIKE "%Nagaland%")
+   OR ("additionalDetail2" LIKE "%Odisha%")
+   OR ("additionalDetail2" LIKE "%Punjab%")
+   OR ("additionalDetail2" LIKE "%Rajasthan%")
+   OR ("additionalDetail2" LIKE "%Sikkim%")
+   OR ("additionalDetail2" LIKE "%Tamil Nadu%")
+   OR ("additionalDetail2" LIKE "%Telangana%")
+   OR ("additionalDetail2" LIKE "%Tripura%")
+   OR ("additionalDetail2" LIKE "%Uttar Pradesh%")
+   OR ("additionalDetail2" LIKE "%Uttarakhand%")
+   OR ("additionalDetail2" LIKE "%West Bengal%")
+   OR ("additionalDetail2" LIKE "%Delhi%")
+   OR ("additionalDetail2" LIKE "%Jammu and Kashmir%")
+   OR ("additionalDetail2" LIKE "%Ladakh%")));
+        """
+    },
+    {
+        "input": "How many species are cultivated in India?",
+        "query": """
+        SELECT COUNT(DISTINCT "scientificName")
+FROM plants
+WHERE "recordType" IN ("AN", "SN") AND ("familyNumber", "genusNumber", "acceptedNameNumber", "synonymNumber") IN
+ (SELECT DISTINCT "familyNumber", "genusNumber", "acceptedNameNumber", "synonymNumber" FROM plants WHERE "recordType" LIKE "%RE%" AND ("additionalDetail2" LIKE "%Cultivated%") AND
+ (("additionalDetail2" LIKE "%India%")
+   OR ("additionalDetail2" LIKE "%Andhra Pradesh%")
+   OR ("additionalDetail2" LIKE "%Arunachal Pradesh%")
+   OR ("additionalDetail2" LIKE "%Assam%")
+   OR ("additionalDetail2" LIKE "%Bihar%")
+   OR ("additionalDetail2" LIKE "%Chhattisgarh%")
+   OR ("additionalDetail2" LIKE "%Goa%")
+   OR ("additionalDetail2" LIKE "%Gujarat%")
+   OR ("additionalDetail2" LIKE "%Haryana%")
+   OR ("additionalDetail2" LIKE "%Himachal Pradesh%")
+   OR ("additionalDetail2" LIKE "%Jharkhand%")
+   OR ("additionalDetail2" LIKE "%Karnataka%")
+   OR ("additionalDetail2" LIKE "%Kerala%")
+   OR ("additionalDetail2" LIKE "%Madhya Pradesh%")
+   OR ("additionalDetail2" LIKE "%Maharashtra%")
+   OR ("additionalDetail2" LIKE "%Manipur%")
+   OR ("additionalDetail2" LIKE "%Meghalaya%")
+   OR ("additionalDetail2" LIKE "%Mizoram%")
+   OR ("additionalDetail2" LIKE "%Nagaland%")
+   OR ("additionalDetail2" LIKE "%Odisha%")
+   OR ("additionalDetail2" LIKE "%Punjab%")
+   OR ("additionalDetail2" LIKE "%Rajasthan%")
+   OR ("additionalDetail2" LIKE "%Sikkim%")
+   OR ("additionalDetail2" LIKE "%Tamil Nadu%")
+   OR ("additionalDetail2" LIKE "%Telangana%")
+   OR ("additionalDetail2" LIKE "%Tripura%")
+   OR ("additionalDetail2" LIKE "%Uttar Pradesh%")
+   OR ("additionalDetail2" LIKE "%Uttarakhand%")
+   OR ("additionalDetail2" LIKE "%West Bengal%")
+   OR ("additionalDetail2" LIKE "%Delhi%")
+   OR ("additionalDetail2" LIKE "%Jammu and Kashmir%")
+   OR ("additionalDetail2" LIKE "%Ladakh%")));
+        """,
+    },
+    {
+        "input": "How many accepted names are only distributed in Karnataka?",
+        "query": """SELECT COUNT(DISTINCT scientificName) as unique_pairs_count FROM plants WHERE "recordType" = "AN" AND
+        ("familyNumber", "genusNumber", "acceptedNameNumber") IN (SELECT DISTINCT "familyNumber", "genusNumber", "acceptedNameNumber" FROM plants
+        WHERE "recordType" = "DB" AND ("additionalDetail2" LIKE "%Karnataka%"
+        AND NOT "additionalDetail2" LIKE "%Andhra Pradesh%"
+        AND NOT "additionalDetail2" LIKE "%Arunachal Pradesh%"
+        AND NOT "additionalDetail2" LIKE "%Assam%"
+        AND NOT "additionalDetail2" LIKE "%Bihar%"
+        AND NOT "additionalDetail2" LIKE "%Chhattisgarh%"
+        AND NOT "additionalDetail2" LIKE "%Goa%"
+        AND NOT "additionalDetail2" LIKE "%Gujarat%"
+        AND NOT "additionalDetail2" LIKE "%Haryana%"
+        AND NOT "additionalDetail2" LIKE "%Himachal Pradesh%"
+        AND NOT "additionalDetail2" LIKE "%Jharkhand%"
+        AND NOT "additionalDetail2" LIKE "%Kerala%"
+        AND NOT "additionalDetail2" LIKE "%Madhya Pradesh%"
+        AND NOT "additionalDetail2" LIKE "%Maharashtra%"
+        AND NOT "additionalDetail2" LIKE "%Manipur%"
+        AND NOT "additionalDetail2" LIKE "%Meghalaya%"
+        AND NOT "additionalDetail2" LIKE "%Mizoram%"
+        AND NOT "additionalDetail2" LIKE "%Nagaland%"
+        AND NOT "additionalDetail2" LIKE "%Odisha%"
+        AND NOT "additionalDetail2" LIKE "%Punjab%"
+        AND NOT "additionalDetail2" LIKE "%Rajasthan%"
+        AND NOT "additionalDetail2" LIKE "%Sikkim%"
+        AND NOT "additionalDetail2" LIKE "%Tamil Nadu%"
+        AND NOT "additionalDetail2" LIKE "%Telangana%"
+        AND NOT "additionalDetail2" LIKE "%Tripura%"
+        AND NOT "additionalDetail2" LIKE "%Uttar Pradesh%"
+        AND NOT "additionalDetail2" LIKE "%Uttarakhand%"
+        AND NOT "additionalDetail2" LIKE "%West Bengal%"
+        AND NOT "additionalDetail2" LIKE "%Delhi%"
+        AND NOT "additionalDetail2" LIKE "%Jammu and Kashmir%"
+        AND NOT "additionalDetail2" LIKE "%Ladakh%"));""",
+    },
+    {
+        "input": "How many accepted names are distributed only in Assam?",
+        "query": """SELECT COUNT(DISTINCT scientificName) FROM plants WHERE "recordType" = "AN" AND
+        ("familyNumber", "genusNumber", "acceptedNameNumber") IN (SELECT DISTINCT "familyNumber", "genusNumber", "acceptedNameNumber" FROM plants
+        WHERE "recordType" = "DB" AND "additionalDetail2" LIKE "%Assam%"
+        AND NOT "additionalDetail2" LIKE "%Andhra Pradesh%"
+        AND NOT "additionalDetail2" LIKE "%Arunachal Pradesh%"
+        AND NOT "additionalDetail2" LIKE "%Bihar%"
+        AND NOT "additionalDetail2" LIKE "%Chhattisgarh%"
+        AND NOT "additionalDetail2" LIKE "%Goa%"
+        AND NOT "additionalDetail2" LIKE "%Gujarat%"
+        AND NOT "additionalDetail2" LIKE "%Haryana%"
+        AND NOT "additionalDetail2" LIKE "%Himachal Pradesh%"
+        AND NOT "additionalDetail2" LIKE "%Jharkhand%"
+        AND NOT "additionalDetail2" LIKE "%Kerala%"
+        AND NOT "additionalDetail2" LIKE "%Madhya Pradesh%"
+        AND NOT "additionalDetail2" LIKE "%Maharashtra%"
+        AND NOT "additionalDetail2" LIKE "%Manipur%"
+        AND NOT "additionalDetail2" LIKE "%Meghalaya%"
+        AND NOT "additionalDetail2" LIKE "%Mizoram%"
+        AND NOT "additionalDetail2" LIKE "%Nagaland%"
+        AND NOT "additionalDetail2" LIKE "%Odisha%"
+        AND NOT "additionalDetail2" LIKE "%Punjab%"
+        AND NOT "additionalDetail2" LIKE "%Rajasthan%"
+        AND NOT "additionalDetail2" LIKE "%Sikkim%"
+        AND NOT "additionalDetail2" LIKE "%Tamil Nadu%"
+        AND NOT "additionalDetail2" LIKE "%Telangana%"
+        AND NOT "additionalDetail2" LIKE "%Tripura%"
+        AND NOT "additionalDetail2" LIKE "%Uttar Pradesh%"
+        AND NOT "additionalDetail2" LIKE "%Uttarakhand%"
+        AND NOT "additionalDetail2" LIKE "%West Bengal%"
+        AND NOT "additionalDetail2" LIKE "%Delhi%"
+        AND NOT "additionalDetail2" LIKE "%Jammu and Kashmir%"
+        AND NOT "additionalDetail2" LIKE "%Ladakh%");"""
+    },
+    {"input": "List all the accepted names under the family 'Gnetaceae'.",
+     "query": """
+SELECT DISTINCT "scientificName" FROM plants
 JOIN (
-		SELECT "Family_Number", "Genus_Number", "Accepted_name_number"
-		FROM plants
-		WHERE "Family_Number" IN (
-				SELECT DISTINCT "Family_Number" FROM plants WHERE "Family_Name" = "Gnetaceae"
-		)
+    SELECT "familyNumber", "genusNumber", "acceptedNameNumber"
+    FROM plants
+    WHERE "familyNumber" IN (
+        SELECT DISTINCT "familyNumber" FROM plants WHERE "familyName" = "Gnetaceae"
+    )
 ) b
-ON plants."Genus_Number" = b."Genus_Number" AND plants."Accepted_name_number" = b."Accepted_name_number" AND plants."Family_Number" = b."Family_Number"
-WHERE plants."Record_Type_Code" = 'AN';
+ON plants."genusNumber" = b."genusNumber" AND plants."acceptedNameNumber" = b."acceptedNameNumber" AND plants."familyNumber" = b."familyNumber"
+WHERE plants."recordType" = 'AN';
 """},
-		{
-				"input": "List all the accepted species that are introduced.",
-				"query": """
-SELECT DISTINCT "Scientific_Name" FROM plants
+    {
+        "input": "List all the accepted species that are introduced.",
+        "query": """
+SELECT DISTINCT "scientificName" FROM plants
 JOIN (
-		SELECT "Family_Number", "Genus_Number", "Accepted_name_number"
-		FROM plants
-		WHERE "Record_Type_Code" = 'RE'and "Additional_Details_2" LIKE '%cultivated%'
+    SELECT "familyNumber", "genusNumber", "acceptedNameNumber"
+    FROM plants
+    WHERE "recordType" = 'RE'and "additionalDetail2" LIKE '%introduced%'
 ) b
-ON plants."Genus_Number" = b."Genus_Number" AND plants."Accepted_name_number" = b."Accepted_name_number" AND plants."Family_Number" = b."Family_Number"
-WHERE plants."Record_Type_Code" = 'AN';
+ON plants."genusNumber" = b."genusNumber" AND plants."acceptedNameNumber" = b."acceptedNameNumber" AND plants."familyNumber" = b."familyNumber"
+WHERE plants."recordType" = 'AN';
 """,
-		},
-		{
-				"input": "List all the accepted names with type 'Cycad'",
-				"query": """
-SELECT DISTINCT "Scientific_Name" FROM plants
+    },
+    {
+        "input": "List all the accepted names with type 'Cycad'",
+        "query": """
+SELECT DISTINCT "scientificName" FROM plants
 JOIN (
-		SELECT "Family_Number", "Genus_Number", "Accepted_name_number"
-		FROM plants
-		WHERE "Record_Type_Code" = 'HB'and "Additional_Details_2" LIKE '%Cycad%'
+    SELECT "familyNumber", "genusNumber", "acceptedNameNumber"
+    FROM plants
+    WHERE "recordType" = 'HB' and "additionalDetail2" LIKE '%Cycad%'
 
 ) b
-ON plants."Genus_Number" = b."Genus_Number" AND plants."Accepted_name_number" = b."Accepted_name_number" AND plants."Family_Number" = b."Family_Number"
-WHERE plants."Record_Type_Code" = 'AN';
+ON plants."genusNumber" = b."genusNumber" AND plants."acceptedNameNumber" = b."acceptedNameNumber" AND plants."familyNumber" = b."familyNumber"
+WHERE plants."recordType" = 'AN';
 """,
-		},
-		{
-				"input": "List all the accepted names under the genus 'Cycas' with more than two synonyms.",
-				"query": """
-SELECT DISTINCT "Scientific_Name" FROM plants
+    },
+    {
+        "input": "List all the accepted names under the genus 'Cycas' with more than two synonyms.",
+        "query": """
+SELECT DISTINCT "scientificName" FROM plants
 JOIN (
-		SELECT "Family_Number", "Genus_Number", "Accepted_name_number"
-		FROM plants
-		WHERE "Genus_Number" IN (
-				SELECT DISTINCT "Genus_Number" FROM plants WHERE "Genus_Name" = 'Cycas'
-		)
-		AND "Family_Number" IN (
-				SELECT DISTINCT "Family_Number" FROM plants WHERE "Genus_Name" = 'Cycas'
-		)
-		AND "Synonym_Number" > 2
+    SELECT "familyNumber", "genusNumber", "acceptedNameNumber"
+    FROM plants
+    WHERE "genusNumber" IN (
+        SELECT DISTINCT "genusNumber" FROM plants WHERE "genusName" = 'Cycas'
+    )
+    AND "familyNumber" IN (
+        SELECT DISTINCT "familyNumber" FROM plants WHERE "genusName" = 'Cycas'
+    )
+    AND "synonymNumber" > 2
 ) b
-ON plants."Genus_Number" = b."Genus_Number" AND plants."Accepted_name_number" = b."Accepted_name_number" AND plants."Family_Number" = b."Family_Number"
-WHERE plants."Record_Type_Code" = 'AN';
+ON plants."genusNumber" = b."genusNumber" AND plants."acceptedNameNumber" = b."acceptedNameNumber" AND plants."familyNumber" = b."familyNumber"
+WHERE plants."recordType" = 'AN';
 """,
-		},
+    },
  {
-				"input":'List all the accepted names published in Asian J. Conservation Biol.',
-				"query": """
-		SELECT DISTINCT "Scientific_Name"
-		FROM plants
-		WHERE "Record_Type_Code" = 'AN' AND "Publication" LIKE '%Asian J. Conservation Biol%';
+        "input":'List all the accepted names published in Asian J. Conservation Biol.',
+        "query": """
+    SELECT DISTINCT "scientificName"
+    FROM plants
+    WHERE "recordType" = 'AN' AND "publication" LIKE '%Asian J. Conservation Biol%';
 
 """,
-		},
+    },
  {
-				"input": 'List all the accepted names linked with endemic tag.',
-				"query": """
-SELECT DISTINCT "Scientific_Name" FROM plants
+        "input": 'List all the accepted names linked with endemic tag.',
+        "query": """
+SELECT DISTINCT "scientificName" FROM plants
 JOIN (
-		SELECT "Family_Number", "Genus_Number", "Accepted_name_number"
-		FROM plants
-		WHERE "Record_Type_Code" = 'DB'and "Additional_Details_2" LIKE '%Endemic%'
+    SELECT "familyNumber", "genusNumber", "acceptedNameNumber"
+    FROM plants
+    WHERE "recordType" = 'DB'and "additionalDetail2" LIKE '%Endemic%'
 
 ) b
-ON plants."Genus_Number" = b."Genus_Number" AND plants."Accepted_name_number" = b."Accepted_name_number" AND plants."Family_Number" = b."Family_Number"
-WHERE plants."Record_Type_Code" = 'AN';
+ON plants."genusNumber" = b."genusNumber" AND plants."acceptedNameNumber" = b."acceptedNameNumber" AND plants."familyNumber" = b."familyNumber"
+WHERE plants."recordType" = 'AN';
 """,
-		},
+    },
  {
-				"input": 'List all the accepted names that have no synonyms.' ,
-				"query": """
+        "input": 'List all the accepted names that have no synonyms.' ,
+        "query": """
+SELECT  DISTINCT a."scientificName" FROM plants a
+group by a."familyNumber",a."genusNumber",a."acceptedNameNumber"
+HAVING  SUM(a."synonymNumber") = 0 AND a."acceptedNameNumber" > 0;
+""",
+    },
+ {
+        "input": 'List all the accepted names authored by Roxb.',
+        "query": """
+SELECT "scientificName"
+FROM plants
+WHERE "recordType" = 'AN'AND "authorName" LIKE '%Roxb%';
+""",
+    },
+ {
+        "input": 'List all genera within each family',
+        "query": """
+SELECT "familyName", "genusName"
+FROM plants
+WHERE "recordType" = 'GE';
+""",
+    },
+     {
+        "input": 'Did Minq. discovered Cycas ryumphii?',
+        "query": """SELECT
+    CASE
+        WHEN EXISTS (
+            SELECT 1
+            FROM plants as a
+            WHERE a."scientificName" = 'Cycas rumphii'
+            AND a."authorName" = 'Miq.'
+        ) THEN 'TRUE'
+        ELSE 'FALSE'
+    END AS ExistsCheck;
+"""},
+	{
+        "input": "List the names of plants from the family 'Rosaceae' having more than 3 synonyms.",
+        "query": """SELECT DISTINCT "scientificName" FROM plants
+JOIN (
+    SELECT "familyNumber", "genusNumber", "acceptedNameNumber"
+    FROM plants
+    WHERE "genusNumber" IN (
+        SELECT DISTINCT "genusNumber" FROM plants WHERE "genusName" = 'Berberis'
+    )
+    AND "familyNumber" IN (
+        SELECT DISTINCT "familyNumber" FROM plants WHERE "genusName" = 'Berberis'
+    )
+    AND "synonymNumber" > 3
+) b
+ON plants."genusNumber" = b."genusNumber" AND plants."acceptedNameNumber" = b."acceptedNameNumber" AND plants."familyNumber" = b."familyNumber"
+WHERE plants."recordType" = 'AN';
+"""
+    },
+    {
+        "input": "List the names of plants from the family 'Cabombaceae' having more than 1 synonyms.",
+        "query": """SELECT DISTINCT "scientificName" FROM plants
+JOIN (
+    SELECT "familyNumber", "genusNumber", "acceptedNameNumber"
+    FROM plants
+    WHERE "familyNumber" IN (
+        SELECT DISTINCT "familyNumber" FROM plants WHERE "familyName" = 'Cabombaceae'
+    )
+    AND "synonymNumber" > 1
+) b
+ON plants."genusNumber" = b."genusNumber" AND plants."acceptedNameNumber" = b."acceptedNameNumber" AND plants."familyNumber" = b."familyNumber"
+WHERE plants."recordType" = 'AN';
+"""
+    },
+  {
+        "input": "List the names of plants from the family 'Nymphaeaceae' having atleast one synonym.",
+        "query": """SELECT DISTINCT "scientificName" FROM plants
+JOIN (
+    SELECT "familyNumber", "genusNumber", "acceptedNameNumber"
+    FROM plants
+    WHERE "familyNumber" IN (
+        SELECT DISTINCT "familyNumber" FROM plants WHERE "familyName" = 'Nymphaeaceae'
+    )
+    AND "synonymNumber" > 1
+) b
+ON plants."genusNumber" = b."genusNumber" AND plants."acceptedNameNumber" = b."acceptedNameNumber" AND plants."familyNumber" = b."familyNumber"
+WHERE plants."recordType" = 'AN';
+"""
+  },
+  {
+        "input": "List all genera within the family 'Polygalaceae'.",
+        "query": """SELECT DISTINCT "genusName" FROM plants
+    WHERE "familyName" = 'Polygalaceae'
+    AND "recordType" = 'GE';
+"""
+  },
+  {
+      "input": "List the species that do not have any synonyms",
+      "query": """
 SELECT  DISTINCT a."Scientific_Name" FROM plants a
 group by a."Family_Number",a."Genus_Number",a."Accepted_name_number"
 HAVING  SUM(a."Synonym_Number") = 0 AND a."Accepted_name_number" > 0;
-""",
-		},
- {
-				"input": 'List all the accepted names authored by Roxb.',
-				"query": """
-SELECT "Scientific_Name"
+"""
+  },
+  {
+      "input": "Find the family with the highest number of genera.",
+      "query": """
+SELECT "familyName", COUNT(DISTINCT "genusName") AS genera_count
 FROM plants
-WHERE "Record_Type_Code" = 'AN'AND "Author_Name" LIKE '%Roxb%';
-""",
-		},
- {
-				"input": 'List all genera within each family',
-				"query": """
-SELECT "Family_Name", "Genus_Name"
+WHERE "recordType" = 'GE'
+GROUP BY "familyName"
+ORDER BY genera_count DESC
+LIMIT 1;"""
+  },
+  {
+      "input":"Count the nnumber of species in Muraltia genus",
+      "query": """
+SELECT COUNT("scientificName")
 FROM plants
-WHERE "Record_Type_Code" = 'GE';
-""",
-		},
-		 {
-				"input": 'Did Minq. discovered Cycas ryumphii?',
-				"query": """SELECT
-		CASE
-				WHEN EXISTS (
-						SELECT 1
-						FROM plants as a
-						WHERE a."Scientific_Name" = 'Cycas rumphii'
-						AND a."Author_Name" = 'Miq.'
-				) THEN 'TRUE'
-				ELSE 'FALSE'
-		END AS ExistsCheck;
+WHERE "recordType" = 'AN'
+AND "genusName" = 'Muraltia';"""
+  },
+  {
+      "input":"Find the genus with the most species",
+      "query": """
+SELECT "genusName", COUNT(DISTINCT "scientificName") AS plant_count
+FROM plants
+WHERE "recordType" = 'AN'
+GROUP BY "genusName"
+ORDER BY plant_count DESC
+LIMIT 1;"""
+  },
+  {
+      "input":"List the accepted names for all plants in the genus 'Tribulus'",
+      "query": """
+SELECT "scientificName"
+FROM plants
+WHERE "recordType" = 'AN'
+AND "genusName" = 'Tribulus';"""
+  },
+  {
+      "input":"List the families that have more than 20 species.",
+      "query": """
+SELECT "familyName", COUNT(DISTINCT "scientificName") AS plant_count
+FROM plants
+WHERE "recordType" = 'AN'
+GROUP BY "familyName"
+HAVING plant_count > 20;"""
+  },
+  {
+      "input":"Which family has the least number of species",
+      "query": """
+SELECT "familyName", COUNT(DISTINCT "scientificName") AS plant_count
+FROM plants
+WHERE "recordType" = 'AN'
+GROUP BY "familyName"
+ORDER BY plant_count ASC
+LIMIT 1;"""
+  },
+  {
+      "input":"List the genera with exactly 10 species.",
+      "query": """
+SELECT "genusName", COUNT(DISTINCT "scientificName") AS plant_count
+FROM plants
+WHERE "recordType" = 'AN'
+GROUP BY "genusName"
+HAVING plant_count = 10;"""
+  },
+  {
+      "input": "Find the species in the genus 'Fissistigma' that have exactly 2 synonyms.",
+      "query": """SELECT "scientificName" FROM plants
+JOIN (
+    SELECT "familyNumber", "genusNumber", "acceptedNameNumber", COUNT("synonymNumber") as s_count
+    FROM plants
+    WHERE "genusNumber" IN (
+        SELECT DISTINCT "genusNumber" FROM plants WHERE "genusName" = 'Fissistigma'
+    )
+     AND "familyNumber" IN (
+        SELECT DISTINCT "familyNumber" FROM plants WHERE "genusName" = 'Fissistigma'
+    )
+    AND "recordType" = 'SN'
+    GROUP BY "acceptedNameNumber"
+    HAVING s_count = 2
+) b
+ON plants."genusNumber" = b."genusNumber" AND plants."acceptedNameNumber" = b."acceptedNameNumber" AND plants."familyNumber" = b."familyNumber"
+WHERE plants."recordType" = 'AN';
 """},
-
-		]
+{
+    "input": "List the genera that have at least one species with more than 10 synonyms.",
+    "query": """SELECT DISTINCT p."genusName"
+FROM plants p
+JOIN (
+    SELECT "acceptedNameNumber", "genusNumber", "familyNumber"
+    FROM plants
+    WHERE "synonymNumber" > 10
+) s
+ON p."acceptedNameNumber" = s."acceptedNameNumber" AND p."genusNumber" = s."genusNumber" AND p."familyNumber" = s."familyNumber"
+WHERE p."recordType" = 'AN';
+"""
+},
+]
 
 
 		example_selector = SemanticSimilarityExampleSelector.from_examples(
@@ -287,7 +777,6 @@ WHERE "Record_Type_Code" = 'GE';
 				k=5,
 				input_keys=["input"],
 				)
-
 
 		prefix_prompt = """
 		You are an agent designed to interact with a SQL database.
@@ -333,8 +822,9 @@ WHERE "Record_Type_Code" = 'GE';
 		13. **Medicinal**: Contains either "YES" or "NO". Specifies whether the plant is medicinal.
 		14. **Genus_Number**: Contains the Genus Number of the plant.
 		15. **Accepted_name_number**: Contains the Accepted Name Number of the plant.
-
+		Remember "Only accepted name" means zero number of synonyms or no synonyms.
 		Below are examples of questions and their corresponding SQL queries.
+		Lastly, for queries related to accepted names, synonyms, genus, families try to use the examples given below and just replace the values such as fmaily name, genus name,etc  based on the input. Do not change anyother aspect of the query. 
 		"""
 
 

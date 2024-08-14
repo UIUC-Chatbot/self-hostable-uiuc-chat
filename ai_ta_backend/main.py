@@ -235,11 +235,17 @@ def query_sql_agent(service: POIAgentService):
         user_01 = HumanMessage(content=user_input)
         inputs = {"messages": [system_message,user_01]}
         response = service.run_workflow(inputs)
-        return  str(response), 200
+        output = None
+        for message in response["messages"]:
+          if 'AIMessage' in message["id"]:
+            op = message["kwargs"]["content"]
+            if len(op) !=0:
+              output = op 
+            
+
+        return  str(output), 200
     except Exception as e:
         return jsonify({"error": str(e)}), 500
-
-
 @app.route('/logToConversationMap', methods=['GET'])
 def logToConversationMap(service: NomicService, flaskExecutor: ExecutorInterface):
   course_name: str = request.args.get('course_name', default='', type=str)

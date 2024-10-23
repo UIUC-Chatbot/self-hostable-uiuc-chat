@@ -21,7 +21,7 @@ COPY . .
 ENV PYTHONPATH="${PYTHONPATH}:/usr/src/app/ai_ta_backend"
 
 # Make port 8000 available to the world outside this container
-EXPOSE 8000
+EXPOSE 8088
 
 # Run the application using Gunicorn with specified configuration
-CMD ["gunicorn", "--workers=1", "--threads=100", "--worker-class=gthread", "ai_ta_backend.main:app", "--timeout=1800", "--bind=0.0.0.0:8000"]
+CMD ["gunicorn", "--workers=1", "--threads=100", "--worker-class=gthread", "ai_ta_backend.main:app", "--timeout=1800", "--bind=0.0.0.0:8088"]

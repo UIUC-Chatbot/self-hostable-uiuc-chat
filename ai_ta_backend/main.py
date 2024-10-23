@@ -481,16 +481,16 @@ def configure(binder: Binder) -> None:
   sql_bound = False
   storage_bound = False
 
-  # Define database URLs with conditional checks for environment variables
-  encoded_password = quote_plus(os.getenv('SUPABASE_PASSWORD'))
+  # Encode the PostgreSQL password
+  encoded_password = quote_plus(os.getenv('POSTGRES_PASSWORD'))
+  print("ENCODED PASSWORD (i.e., POSTGRES_PASSWORD):", encoded_password)
+
+  # Define database URLs with corrected environment variables
   DB_URLS = {
-      'supabase':
-          f"postgresql://{os.getenv('SUPABASE_USER')}:{encoded_password}@{os.getenv('SUPABASE_URL')}",
-      'sqlite':
-          f"sqlite:///{os.getenv('SQLITE_DB_NAME')}" if os.getenv('SQLITE_DB_NAME') else None,
-      'postgres':
-          f"postgresql://{os.getenv('POSTGRES_USER')}:{os.getenv('POSTGRES_PASSWORD')}@{os.getenv('POSTGRES_URL')}"
-          if os.getenv('POSTGRES_USER') and os.getenv('POSTGRES_PASSWORD') and os.getenv('POSTGRES_URL') else None
+      'supabase': f"postgresql://{os.getenv('POSTGRES_USER')}:{encoded_password}@{os.getenv('POSTGRES_HOST')}:{os.getenv('POSTGRES_PORT')}/{os.getenv('POSTGRES_DB')}",
+      'sqlite': f"sqlite:///{os.getenv('SQLITE_DB_NAME')}" if os.getenv('SQLITE_DB_NAME') else None,
+      'postgres': f"postgresql://{os.getenv('POSTGRES_USER')}:{encoded_password}@{os.getenv('POSTGRES_HOST')}:{os.getenv('POSTGRES_PORT')}/{os.getenv('POSTGRES_DB')}" 
+                  if all([os.getenv('POSTGRES_USER'), os.getenv('POSTGRES_PASSWORD'), os.getenv('POSTGRES_HOST'), os.getenv('POSTGRES_PORT'), os.getenv('POSTGRES_DB')]) else None
   }
 
   # Bind to the first available SQL database configuration
@@ -569,4 +569,4 @@ def configure(binder: Binder) -> None:
 FlaskInjector(app=app, modules=[configure])
 
 if __name__ == '__main__':
-  app.run(debug=True, port=int(os.getenv("PORT", default=8000)))  # nosec -- reasonable bandit error suppression
+  app.run(debug=True, port=int(os.getenv("PORT", default=8088)))  # nosec -- reasonable bandit error suppression

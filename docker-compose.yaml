@@ -32,7 +32,7 @@ services:
           "-f",
           "-H",
           "Authorization: Bearer qd-SbvSWrYpa473J33yPjdL",
-          "http://localhost:6333/health"
+          "http://localhost:6333/health",
         ]
       interval: 30s
       timeout: 10s
@@ -69,6 +69,38 @@ services:
       - qdrant
       - redis
       - minio
+    environment:
+      - POSTGRES_HOST=supabase-db
+      - POSTGRES_PORT=5432
+      - POSTGRES_DB=postgres
+      - POSTGRES_USER=postgres
+      - POSTGRES_PASSWORD=${POSTGRES_PASSWORD}
+
+    # Supabase services
+  supabase-db:
+    image: supabase/postgres:15.1.0.103
+    ports:
+      - "5432:5432"
+    environment:
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
+    networks:
+      - my-network
+    volumes:
+      - supabase-db-data:/var/lib/postgresql/data
+
+  supabase:
+    image: supabase/supabase-studio:20231124-7a0c5be
+    ports:
+      - "8001:8000" # Changed from 8000 to avoid potential conflicts
+    environment:
+      STUDIO_PG_META_URL: http://meta:8080
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
+      DEFAULT_ORGANIZATION: ${SUPABASE_ORG}
+      DEFAULT_PROJECT: ${SUPABASE_PROJECT}
+    networks:
+      - my-network
+    depends_on:
+      - supabase-db
 
 # declare the network resource
 # this will allow you to use service discovery and address a container by its name from within the network

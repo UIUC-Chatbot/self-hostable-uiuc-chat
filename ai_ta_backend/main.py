@@ -487,10 +487,19 @@ def configure(binder: Binder) -> None:
 
   # Define database URLs with corrected environment variables
   DB_URLS = {
-      'supabase': f"postgresql://{os.getenv('POSTGRES_USER')}:{encoded_password}@{os.getenv('POSTGRES_HOST')}:{os.getenv('POSTGRES_PORT')}/{os.getenv('POSTGRES_DB')}",
-      'sqlite': f"sqlite:///{os.getenv('SQLITE_DB_NAME')}" if os.getenv('SQLITE_DB_NAME') else None,
-      'postgres': f"postgresql://{os.getenv('POSTGRES_USER')}:{encoded_password}@{os.getenv('POSTGRES_HOST')}:{os.getenv('POSTGRES_PORT')}/{os.getenv('POSTGRES_DB')}" 
-                  if all([os.getenv('POSTGRES_USER'), os.getenv('POSTGRES_PASSWORD'), os.getenv('POSTGRES_HOST'), os.getenv('POSTGRES_PORT'), os.getenv('POSTGRES_DB')]) else None
+      'supabase':
+          f"postgresql://{os.getenv('POSTGRES_USER')}:{encoded_password}@{os.getenv('POSTGRES_HOST')}:{os.getenv('POSTGRES_PORT')}/{os.getenv('POSTGRES_DB')}",
+      'sqlite':
+          f"sqlite:///{os.getenv('SQLITE_DB_NAME')}" if os.getenv('SQLITE_DB_NAME') else None,
+      'postgres':
+          f"postgresql://{os.getenv('POSTGRES_USER')}:{encoded_password}@{os.getenv('POSTGRES_HOST')}:{os.getenv('POSTGRES_PORT')}/{os.getenv('POSTGRES_DB')}"
+          if all([
+              os.getenv('POSTGRES_USER'),
+              os.getenv('POSTGRES_PASSWORD'),
+              os.getenv('POSTGRES_HOST'),
+              os.getenv('POSTGRES_PORT'),
+              os.getenv('POSTGRES_DB')
+          ]) else None
   }
 
   # Bind to the first available SQL database configuration
@@ -566,7 +575,8 @@ def configure(binder: Binder) -> None:
   binder.bind(ProcessPoolExecutorInterface, to=ProcessPoolExecutorAdapter, scope=SingletonScope)
   logging.info("Configured all services and adapters", binder._bindings)
 
+
 FlaskInjector(app=app, modules=[configure])
 
 if __name__ == '__main__':
-  app.run(debug=True, port=int(os.getenv("PORT", default=8088)))  # nosec -- reasonable bandit error suppression
+  app.run(debug=True, port=int(os.getenv("PORT", default=8000)))  # nosec -- reasonable bandit error suppression

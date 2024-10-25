@@ -89,7 +89,7 @@ services:
       - supabase-db-data:/var/lib/postgresql/data
 
   supabase:
-    image: supabase/supabase-studio:20231124-7a0c5be
+    image: supabase/studio:20240923-2e3e90c
     ports:
       - "8001:8000" # Changed from 8000 to avoid potential conflicts
     environment:
@@ -111,3 +111,4 @@ volumes:
   redis-data: {}
   qdrant-data: {}
   minio-data: {}
+  supabase-db-data: {}

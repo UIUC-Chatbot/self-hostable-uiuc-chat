@@ -482,17 +482,17 @@ def configure(binder: Binder) -> None:
   storage_bound = False
 
   # Encode the PostgreSQL password
-  encoded_password = quote_plus(os.getenv('POSTGRES_PASSWORD'))
-  print("ENCODED PASSWORD (i.e., POSTGRES_PASSWORD):", encoded_password)
+  #encoded_password = quote_plus(os.getenv('POSTGRES_PASSWORD'))
+  #print("ENCODED PASSWORD (i.e., POSTGRES_PASSWORD):", encoded_password)
 
   # Define database URLs with corrected environment variables
   DB_URLS = {
       'supabase':
-          f"postgresql://{os.getenv('POSTGRES_USER')}:{encoded_password}@{os.getenv('POSTGRES_HOST')}:{os.getenv('POSTGRES_PORT')}/{os.getenv('POSTGRES_DB')}",
+          f"postgresql://{os.getenv('POSTGRES_USER')}:{os.getenv('POSTGRES_PASSWORD')}@{os.getenv('POSTGRES_HOST')}:{os.getenv('POSTGRES_PORT')}/{os.getenv('POSTGRES_DB')}",
       'sqlite':
           f"sqlite:///{os.getenv('SQLITE_DB_NAME')}" if os.getenv('SQLITE_DB_NAME') else None,
       'postgres':
-          f"postgresql://{os.getenv('POSTGRES_USER')}:{encoded_password}@{os.getenv('POSTGRES_HOST')}:{os.getenv('POSTGRES_PORT')}/{os.getenv('POSTGRES_DB')}"
+          f"postgresql://{os.getenv('POSTGRES_USER')}:{os.getenv('POSTGRES_PASSWORD')}@{os.getenv('POSTGRES_HOST')}:{os.getenv('POSTGRES_PORT')}/{os.getenv('POSTGRES_DB')}"
           if all([
               os.getenv('POSTGRES_USER'),
               os.getenv('POSTGRES_PASSWORD'),

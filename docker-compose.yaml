@@ -66,9 +66,14 @@ services:
     networks:
       - my-network
     depends_on:
-      - qdrant
-      - redis
-      - minio
+      supabase-db:
+        condition: service_healthy
+      qdrant:
+        condition: service_started
+      redis:
+        condition: service_started
+      minio:
+        condition: service_started
     environment:
       - POSTGRES_HOST=supabase-db
       - POSTGRES_PORT=5432
@@ -79,6 +84,12 @@ services:
     # Supabase services
   supabase-db:
     image: supabase/postgres:15.1.0.103
+    container_name: supabase-db
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U postgres"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
     ports:
       - "5432:5432"
     environment:
@@ -89,7 +100,8 @@ services:
       - supabase-db-data:/var/lib/postgresql/data
 
   supabase:
-    image: supabase/supabase-studio:20231124-7a0c5be
+    image: supabase/studio:20240923-2e3e90c
+    container_name: supabase-studio
     ports:
       - "8001:8000" # Changed from 8000 to avoid potential conflicts
     environment:
@@ -111,3 +123,4 @@ volumes:
   redis-data: {}
   qdrant-data: {}
   minio-data: {}
+  supabase-db-data: {}

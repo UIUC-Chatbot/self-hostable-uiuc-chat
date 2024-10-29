@@ -23,6 +23,9 @@ class SQLAlchemyDatabase:
     def __init__(self, db: db):
         logging.info("Initializing SQLAlchemyDatabase")
         self.db = db
+
+    def _get_session(self):
+        return self.db.session if hasattr(self.db, 'session') else self.db
     
     # Document-related queries
 
@@ -44,14 +47,31 @@ class SQLAlchemyDatabase:
         finally:
             self.db.session.close()
     
+    # def getMaterialsLikeCourseAndKeyAndValue(self, course_name: str, key: str, value: str):
+    #     session = self._get_session()
+    #     try:
+
+    #         query = session.query(models.Document).where(models.Document.course_name == course_name, getattr(models.Document, key).like(f"%{value}%"))
+    #         result = session.execute(query).scalars().all()
+    #         documents: List[models.Document] = [doc.to_dict() for doc in result]
+    #         return DatabaseResponse[models.Document](data=documents, count=len(result)).to_dict()
+    #     finally:
+    #         session.close()
+
     def getMaterialsLikeCourseAndKeyAndValue(self, course_name: str, key: str, value: str):
+        session = self._get_session()
         try:
-            query = self.db.select(models.Document).where(models.Document.course_name == course_name, getattr(models.Document, key).like(f"%{value}%"))
-            result = self.db.session.execute(query).scalars().all()
+            # Use the `query` method, compatible with both older and newer SQLAlchemy versions
+            query = session.query(models.Document).filter(
+                models.Document.course_name == course_name,
+                getattr(models.Document, key).like(f"%{value}%")
+            )
+            result = query.all()
             documents: List[models.Document] = [doc.to_dict() for doc in result]
             return DatabaseResponse[models.Document](data=documents, count=len(result)).to_dict()
         finally:
-            self.db.session.close()
+            session.close()
+
     
     def getMaterialsForCourseAndKeyAndValue(self, course_name: str, key: str, value: str):
         try:

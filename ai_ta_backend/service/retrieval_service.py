@@ -14,7 +14,7 @@ import openai
 from ai_ta_backend.database.aws import AWSStorage
 from ai_ta_backend.database.qdrant import VectorDatabase
 from ai_ta_backend.database.sql import SQLAlchemyDatabase
-from ai_ta_backend.service.nomic_service import NomicService
+#from ai_ta_backend.service.nomic_service import NomicService
 from ai_ta_backend.service.posthog_service import PosthogService
 from ai_ta_backend.service.sentry_service import SentryService
 from ai_ta_backend.utils.utils_tokenization import count_tokens_and_cost
@@ -27,34 +27,40 @@ class RetrievalService:
 
   @inject
   def __init__(self, vdb: VectorDatabase, sqlDb: SQLAlchemyDatabase, aws: AWSStorage, posthog: Optional[PosthogService],
-               sentry: Optional[SentryService], nomicService: Optional[NomicService]):
+               sentry: Optional[SentryService]):
     self.vdb = vdb
     self.sqlDb = sqlDb
     self.aws = aws
     self.sentry = sentry
     self.posthog = posthog
-    self.nomicService = nomicService
+    #self.nomicService = nomicService
 
     logging.info(f"Vector DB: {self.vdb}")
 
-    openai.api_key = os.environ["OPENAI_API_KEY"]
+    openai.api_key = os.environ["VLADS_OPENAI_KEY"]
+
+    # self.embeddings = OpenAIEmbeddings(
+    #     model='text-embedding-ada-002',
+    #     openai_api_base=os.environ["AZURE_OPENAI_ENDPOINT"],
+    #     openai_api_type=os.environ['OPENAI_API_TYPE'],
+    #     openai_api_key=os.environ["AZURE_OPENAI_KEY"],
+    #     openai_api_version=os.environ["OPENAI_API_VERSION"],
+    # )
 
     self.embeddings = OpenAIEmbeddings(
         model='text-embedding-ada-002',
-        openai_api_base=os.environ["AZURE_OPENAI_ENDPOINT"],
-        openai_api_type=os.environ['OPENAI_API_TYPE'],
-        openai_api_key=os.environ["AZURE_OPENAI_KEY"],
-        openai_api_version=os.environ["OPENAI_API_VERSION"],
+        openai_api_type='openai',
+        api_key=os.environ["VLADS_OPENAI_KEY"],
     )
 
-    self.llm = AzureChatOpenAI(
-        temperature=0,
-        deployment_name=os.environ["AZURE_OPENAI_ENGINE"],
-        openai_api_base=os.environ["AZURE_OPENAI_ENDPOINT"],
-        openai_api_key=os.environ["AZURE_OPENAI_KEY"],
-        openai_api_version=os.environ["OPENAI_API_VERSION"],
-        openai_api_type=os.environ['OPENAI_API_TYPE'],
-    )
+    # self.llm = AzureChatOpenAI(
+    #     temperature=0,
+    #     deployment_name=os.environ["AZURE_OPENAI_ENGINE"],
+    #     openai_api_base=os.environ["AZURE_OPENAI_ENDPOINT"],
+    #     openai_api_key=os.environ["AZURE_OPENAI_KEY"],
+    #     openai_api_version=os.environ["OPENAI_API_VERSION"],
+    #     openai_api_type=os.environ['OPENAI_API_TYPE'],
+    # )
 
   def getTopContexts(self,
                      search_query: str,
@@ -340,8 +346,8 @@ class RetrievalService:
       if not data:
         raise Exception(f"No document map found for this course: {course_name}")
       project_id = str(data[0].doc_map_id)
-      if self.nomicService is not None:
-        self.nomicService.delete_from_document_map(project_id, nomic_ids_to_delete)
+      # if self.nomicService is not None:
+      #   self.nomicService.delete_from_document_map(project_id, nomic_ids_to_delete)
     except Exception as e:
       logging.info(f"Nomic Error in deleting. {identifier_key}: {identifier_value}", e)
       if self.sentry is not None:

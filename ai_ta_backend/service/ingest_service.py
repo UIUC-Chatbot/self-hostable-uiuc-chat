@@ -50,8 +50,11 @@ from ai_ta_backend.service.posthog_service import PosthogService
 from ai_ta_backend.service.sentry_service import SentryService
 from ai_ta_backend.utils.OpenaiEmbeddings import OpenAIAPIProcessor
 
+from ai_ta_backend.extensions import db
+
 from sqlalchemy import create_engine
 from sqlalchemy.orm import sessionmaker
+from flask_sqlalchemy import SQLAlchemy
 
 from urllib.parse import quote_plus
 
@@ -61,19 +64,21 @@ logging.basicConfig(level=logging.DEBUG, format='%(asctime)s - %(levelname)s - %
 # Initialize the database connection
 encoded_password = quote_plus(os.environ['SUPABASE_PASSWORD'])
 
-print(os.getenv('SUPABASE_PG_URL'))
+print(os.getenv('SUPABASE_URL'))
 
-db_url = f"postgresql://{os.getenv('SUPABASE_USER')}:{encoded_password}@{os.getenv('SUPABASE_PG_URL')}"
+db_url = f"postgresql://{os.getenv('SUPABASE_USER')}:{encoded_password}@{os.getenv('SUPABASE_URL')}"
 print(f"DB URL: {db_url}")
 
 engine = create_engine(db_url)
 Session = sessionmaker(bind=engine)
-db = Session()
+session = Session()
+
+# Initialize the SQLAlchemy instance
 
 class IngestService:
     @inject
     def __init__(self):
-        self.sqlDb = SQLAlchemyDatabase(db=db)
+        self.sqlDb = SQLAlchemyDatabase(db=session)
         self.vectorDb = VectorDatabase()
         self.aws = AWSStorage()
         self.posthog = PosthogService()
@@ -1099,10 +1104,9 @@ class IngestService:
                 # do not remove anything and proceed with duplicate checking
                 original_filename = incoming_filename
             print(f"Filename after removing uuid: {original_filename}")
-            
             supabase_contents = self.sqlDb.getMaterialsLikeCourseAndKeyAndValue(course_name, 's3_path', original_filename)
             print(f"No. of S3 path based records retrieved: {len(supabase_contents)}")  # multiple records can be retrieved: 3.pdf and 453.pdf
-
+            print("Supabase contents: ", supabase_contents)
         elif url:
             original_filename = url
             supabase_contents = self.sqlDb.getMaterialsForCourseAndKeyAndValue(course_name, 'url', url)
@@ -1113,8 +1117,10 @@ class IngestService:
 
         supabase_whole_text = ""
         exact_doc_exists = False
-        if len(supabase_contents) > 0:  # a doc with same filename exists in Supabase
-            for record in supabase_contents:
+        print("Supabase contents: ", supabase_contents)
+        if len(supabase_contents['data']) > 0:  # a doc with same filename exists in Supabase
+            for record in supabase_contents['data']:
+                print("Record: ", record)
                 if incoming_s3_path:
                     curr_filename = record['s3_path'].split('/')[-1]
                     older_s3_path = record['s3_path']

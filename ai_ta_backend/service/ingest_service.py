@@ -1105,12 +1105,12 @@ class IngestService:
                 original_filename = incoming_filename
             print(f"Filename after removing uuid: {original_filename}")
             supabase_contents = self.sqlDb.getMaterialsLikeCourseAndKeyAndValue(course_name, 's3_path', original_filename)
-            print(f"No. of S3 path based records retrieved: {len(supabase_contents)}")  # multiple records can be retrieved: 3.pdf and 453.pdf
+            print(f"No. of S3 path based records retrieved: {len(supabase_contents['data'])}")  # multiple records can be retrieved: 3.pdf and 453.pdf
             print("Supabase contents: ", supabase_contents)
         elif url:
             original_filename = url
             supabase_contents = self.sqlDb.getMaterialsForCourseAndKeyAndValue(course_name, 'url', url)
-            print(f"No. of URL-based records retrieved: {len(supabase_contents)}")
+            print(f"No. of URL-based records retrieved: {len(supabase_contents['data'])}")
         else:
             original_filename = None
             supabase_contents = []

@@ -486,43 +486,44 @@ def configure(binder: Binder) -> None:
   #print("ENCODED PASSWORD (i.e., POSTGRES_PASSWORD):", encoded_password)
 
   # Define database URLs with corrected environment variables
-  DB_URLS = {
-      'supabase':
-          f"postgresql://{os.getenv('POSTGRES_USER')}:{os.getenv('POSTGRES_PASSWORD')}@{os.getenv('POSTGRES_HOST')}:{os.getenv('POSTGRES_PORT')}/{os.getenv('POSTGRES_DB')}",
-      'sqlite':
-          f"sqlite:///{os.getenv('SQLITE_DB_NAME')}" if os.getenv('SQLITE_DB_NAME') else None,
-      'postgres':
-          f"postgresql://{os.getenv('POSTGRES_USER')}:{os.getenv('POSTGRES_PASSWORD')}@{os.getenv('POSTGRES_HOST')}:{os.getenv('POSTGRES_PORT')}/{os.getenv('POSTGRES_DB')}"
-          if all([
-              os.getenv('POSTGRES_USER'),
-              os.getenv('POSTGRES_PASSWORD'),
-              os.getenv('POSTGRES_HOST'),
-              os.getenv('POSTGRES_PORT'),
-              os.getenv('POSTGRES_DB')
-          ]) else None
-  }
+  # DB_URLS = {
+  #     'supabase':
+  #         f"postgresql://{os.getenv('POSTGRES_USER')}:{os.getenv('POSTGRES_PASSWORD')}@{os.getenv('POSTGRES_HOST')}:{os.getenv('POSTGRES_PORT')}/{os.getenv('POSTGRES_DB')}",
+  #     'sqlite':
+  #         f"sqlite:///{os.getenv('SQLITE_DB_NAME')}" if os.getenv('SQLITE_DB_NAME') else None,
+  #     'postgres':
+  #         f"postgresql://{os.getenv('POSTGRES_USER')}:{os.getenv('POSTGRES_PASSWORD')}@{os.getenv('POSTGRES_HOST')}:{os.getenv('POSTGRES_PORT')}/{os.getenv('POSTGRES_DB')}"
+  #         if all([
+  #             os.getenv('POSTGRES_USER'),
+  #             os.getenv('POSTGRES_PASSWORD'),
+  #             os.getenv('POSTGRES_HOST'),
+  #             os.getenv('POSTGRES_PORT'),
+  #             os.getenv('POSTGRES_DB')
+  #         ]) else None
+  # }
+  # print("DB_URLS:", DB_URLS)
 
-  # Bind to the first available SQL database configuration
-  for db_type, url in DB_URLS.items():
-    if url:
-      logging.info(f"Binding to {db_type} database with URL: {url}")
-      with app.app_context():
-        app.config['SQLALCHEMY_DATABASE_URI'] = url
-        db.init_app(app)
+  # # Bind to the first available SQL database configuration
+  # for db_type, url in DB_URLS.items():
+  #   if url:
+  #     logging.info(f"Binding to {db_type} database with URL: {url}")
+  #     with app.app_context():
+  #       app.config['SQLALCHEMY_DATABASE_URI'] = url
+  #       db.init_app(app)
 
-        # Check if tables exist before creating them
-        inspector = inspect(db.engine)
-        existing_tables = inspector.get_table_names()
+  #       # Check if tables exist before creating them
+  #       inspector = inspect(db.engine)
+  #       existing_tables = inspector.get_table_names()
+  #       print("Existing tables:", existing_tables)
+  #       if not existing_tables:
+  #         logging.info("Creating tables as the database is empty")
+  #         db.create_all()
+  #       else:
+  #         logging.info("Tables already exist, skipping creation")
 
-        if not existing_tables:
-          logging.info("Creating tables as the database is empty")
-          db.create_all()
-        else:
-          logging.info("Tables already exist, skipping creation")
-
-      binder.bind(SQLAlchemyDatabase, to=SQLAlchemyDatabase(db), scope=SingletonScope)
-      sql_bound = True
-      break
+  #     binder.bind(SQLAlchemyDatabase, to=SQLAlchemyDatabase(db), scope=SingletonScope)
+  #     sql_bound = True
+  #     break
 
   # Conditionally bind databases based on the availability of their respective secrets
   if all(os.getenv(key) for key in ["QDRANT_URL", "QDRANT_API_KEY", "QDRANT_COLLECTION_NAME"]) or any(

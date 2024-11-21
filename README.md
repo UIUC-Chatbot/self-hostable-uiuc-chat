@@ -41,7 +41,7 @@ See docs on https://docs.uiuc.chat
 
 ## 📣 Development
 
-test 3
+test 4
 
 If you're interested in contributing, check out our [official developer quickstart](https://docs.uiuc.chat/developers/developer-quickstart).
 

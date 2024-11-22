@@ -37,15 +37,13 @@ from ai_ta_backend.executors.thread_pool_executor import \
 from ai_ta_backend.executors.thread_pool_executor import \
     ThreadPoolExecutorInterface
 from ai_ta_backend.extensions import db
+from ai_ta_backend.redis_queue.ingestQueue import addJobToIngestQueue
 from ai_ta_backend.service.export_service import ExportService
 #from ai_ta_backend.service.nomic_service import NomicService
 from ai_ta_backend.service.posthog_service import PosthogService
 from ai_ta_backend.service.retrieval_service import RetrievalService
 from ai_ta_backend.service.sentry_service import SentryService
 from ai_ta_backend.service.workflow_service import WorkflowService
-
-from ai_ta_backend.redis_queue.ingestQueue import addJobToIngestQueue
-
 
 app = Flask(__name__)
 CORS(app)
@@ -184,6 +182,29 @@ def delete(service: RetrievalService, flaskExecutor: ExecutorInterface):
   return response
 
 
+@app.route('/addDocumentsToDocGroups', methods=['POST'])
+def addDocumentsToDocGroups(vector: VectorDatabase):
+  """
+  Add documents to document groups in the Qdrant vector database.
+  """
+  course_name: str = request.args.get('course_name', default='', type=str)
+  doc_data = request.get_json()
+
+  if course_name == '' or not doc_data:
+    # proper web error "400 Bad request"
+    abort(400, description=f"Missing required parameters: 'course_name' and request body must be provided. Course name: `{course_name}`")
+
+  start_time = time.monotonic()
+
+  # Execute synchronously
+  vector.add_documents_to_doc_groups(course_name, doc_data)
+  logging.info(f"⏰ Runtime of add doc groups for course: {course_name}: {(time.monotonic() - start_time):.2f} seconds")
+
+  response = jsonify({"outcome": 'success'})
+  response.headers.add('Access-Control-Allow-Origin', '*')
+  return response
+
+
 # @app.route('/getNomicMap', methods=['GET'])
 # def nomic_map(service: NomicService):
 #   course_name: str = request.args.get('course_name', default='', type=str)
@@ -200,7 +221,6 @@ def delete(service: RetrievalService, flaskExecutor: ExecutorInterface):
 #   response.headers.add('Access-Control-Allow-Origin', '*')
 #   return response
 
-
 # @app.route('/createDocumentMap', methods=['GET'])
 # def createDocumentMap(service: NomicService):
 #   course_name: str = request.args.get('course_name', default='', type=str)
@@ -214,7 +234,6 @@ def delete(service: RetrievalService, flaskExecutor: ExecutorInterface):
 #   response = jsonify(map_id)
 #   response.headers.add('Access-Control-Allow-Origin', '*')
 #   return response
-
 
 # @app.route('/createConversationMap', methods=['GET'])
 # def createConversationMap(service: NomicService):
@@ -230,7 +249,6 @@ def delete(service: RetrievalService, flaskExecutor: ExecutorInterface):
 #   response.headers.add('Access-Control-Allow-Origin', '*')
 #   return response
 
-
 # @app.route('/logToConversationMap', methods=['GET'])
 # def logToConversationMap(service: NomicService, flaskExecutor: ExecutorInterface):
 #   course_name: str = request.args.get('course_name', default='', type=str)
@@ -245,7 +263,6 @@ def delete(service: RetrievalService, flaskExecutor: ExecutorInterface):
 #   response = jsonify(map_id)
 #   response.headers.add('Access-Control-Allow-Origin', '*')
 #   return response
-
 
 # @app.route('/onResponseCompletion', methods=['POST'])
 # def logToNomic(service: NomicService, flaskExecutor: ExecutorInterface):
@@ -481,6 +498,7 @@ def run_flow(service: WorkflowService) -> Response:
     else:
       abort(400, description=f"Bad request: {e}")
 
+
 @app.route('/ingest', methods=['POST'])
 def ingest() -> Response:
   logging.info("In /ingest")
@@ -491,12 +509,7 @@ def ingest() -> Response:
   result = addJobToIngestQueue(data)
   logging.info("Result from addJobToIngestQueue:  %s", result)
 
-  response = jsonify(
-    {
-      "outcome": f'Queued Ingest task',
-      "ingest_task_id": result
-    }
-  )
+  response = jsonify({"outcome": f'Queued Ingest task', "ingest_task_id": result})
   response.headers.add('Access-Control-Allow-Origin', '*')
   return response
 
@@ -589,6 +602,7 @@ def configure(binder: Binder) -> None:
   binder.bind(ThreadPoolExecutorInterface, to=ThreadPoolExecutorAdapter, scope=SingletonScope)
   binder.bind(ProcessPoolExecutorInterface, to=ProcessPoolExecutorAdapter, scope=SingletonScope)
   logging.info("Configured all services and adapters", binder._bindings)
+
 
 FlaskInjector(app=app, modules=[configure])
 

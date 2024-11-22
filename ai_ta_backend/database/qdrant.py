@@ -57,6 +57,37 @@ class VectorDatabase():
 
     return search_results
 
+  def add_documents_to_doc_groups(self, course_name: str, doc: dict):
+    """
+    Update doc_groups for existing documents in the vector database.
+    
+    Args:
+        course_name (str): Name of the course
+        doc (dict): Document object containing url, s3_path, and doc_groups
+    
+    Returns:
+        Response from Qdrant set_payload operation
+    """
+    # Build search conditions
+    must_conditions = [models.FieldCondition(key='course_name', match=models.MatchValue(value=course_name))]
+
+    # Add URL condition if present
+    if doc.get('url'):
+      must_conditions.append(models.FieldCondition(key='url', match=models.MatchValue(value=doc['url'])))
+
+    # Add S3 path condition
+    must_conditions.append(models.FieldCondition(key='s3_path', match=models.MatchValue(value=doc.get('s3_path', ''))))
+
+    # Create the search filter
+    search_filter = models.Filter(must=must_conditions)
+
+    # Update the payload with new doc_groups
+    response = self.qdrant_client.set_payload(collection_name=os.environ['QDRANT_COLLECTION_NAME'],
+                                              payload={'doc_groups': doc['doc_groups']},
+                                              points_filter=search_filter)
+
+    return response
+
   def _create_search_conditions(self, course_name, doc_groups: List[str]):
     """
     Create search conditions for the vector search.

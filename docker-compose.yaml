@@ -78,10 +78,10 @@ services:
       retries: 3
 
   flask-app:
-    build: . # Directory with Dockerfile for Flask app
+    build: ./uiuc-chat-backend # Directory with Dockerfile for Flask app
     # image: kastanday/ai-ta-backend:gunicorn
-    restart: unless-stopped
     container_name: flask-app
+    restart: unless-stopped
     ports:
       - "${FLASK_PORT}:8000"
     volumes:
@@ -94,7 +94,7 @@ services:
       - redis
       - minio
     env_file:
-      - .env
+      - ./uiuc-chat-backend/.env
     healthcheck:
       test: [ "CMD", "curl", "-f", "http://flask-app:8000" ]
       interval: 30s
@@ -102,7 +102,7 @@ services:
       retries: 3
 
   ingest-worker:
-    build: . # Use the same build context as the Flask app
+    build: ./uiuc-chat-backend # Use the same build context as the Flask app
     command: python ai_ta_backend/redis_queue/worker.py
     restart: unless-stopped
     container_name: ingest-worker
@@ -112,7 +112,7 @@ services:
     depends_on:
       - redis
     env_file:
-      - .env
+      - ./uiuc-chat-backend/.env
     healthcheck:
       test: [ "CMD", "python", "-c", "from redis import Redis; from rq import Worker; r = Redis(host='redis', port=6379, password='${INGEST_REDIS_PASSWORD}'); exit(0 if Worker.count(r) > 0 else 1)" ]
       interval: 30s

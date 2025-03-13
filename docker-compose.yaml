@@ -138,9 +138,11 @@ services:
   keycloak:
     image: quay.io/keycloak/keycloak:26.1
     container_name: keycloak
-    restart: unless-stopped
+    restart: unless-stopped    
+    env_file:
+      - .env
     environment:
-      - KEYCLOAK_ADMIN=${KEYCLOAK_ADMIN}
+      - KEYCLOAK_ADMIN=${KEYCLOAK_ADMIN_USERNAME}
       - KEYCLOAK_ADMIN_PASSWORD=${KEYCLOAK_ADMIN_PASSWORD}
       - KC_DB_URL=jdbc:postgresql://supabase-db:5432/postgres
       - KC_DB_USERNAME=${POSTGRES_USER}
@@ -163,7 +165,7 @@ services:
       - QUARKUS_DATASOURCE_JDBC_URL=jdbc:postgresql://supabase-db:5432/postgres
       - QUARKUS_TRANSACTION_MANAGER_ENABLE_RECOVERY=true
     volumes:
-      - ./keycloak-theme/keywind:/opt/keycloak/themes/keywind
+      - ./keycloak/keywind:/opt/keycloak/themes/keywind
       - ./keycloak/realms/realm-export.json:/opt/keycloak/data/import/realm-export.json
       - ./keycloak/realms/master_realm_export.json:/opt/keycloak/data/import/master_realm_export.json
     ports:
@@ -174,12 +176,11 @@ services:
     expose:
       - 8080
     command:
-      - start-dev
+      - start
       - --db=postgres
       - --db-url=jdbc:postgresql://supabase-db:5432/postgres
       - --db-username=${POSTGRES_USER}
       - --db-password=${POSTGRES_PASSWORD}
-      - --spi-theme-login-default=keywind
       - --import-realm
     healthcheck:
       test: [ "CMD", "curl", "-f", "http://localhost:8080/auth/health/ready" ]

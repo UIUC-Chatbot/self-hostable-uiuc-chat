@@ -47,8 +47,6 @@ set -e
 echo "Starting Supabase services..."
 if [ "$wipe_data" = true ]; then
   docker compose -f ./supabase/docker/docker-compose.yml down -v
-else
-  docker compose -f ./supabase/docker/docker-compose.yml down
 fi
 sudo docker compose -f ./supabase/docker/docker-compose.yml -f ./docker-compose.override.yml up -d --build
 
@@ -80,8 +78,6 @@ chmod -R 777 ./supabase
 echo "Starting application services..."
 if [ "$wipe_data" = true ]; then
   docker compose -f ./docker-compose.yaml down -v
-else
-  docker compose -f ./docker-compose.yaml down
 fi
 
 # Start all services
